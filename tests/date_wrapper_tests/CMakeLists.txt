@@ -5,7 +5,6 @@ set(MODULE_TEST date_wrapper_tests)
 project(${MODULE_TEST})
 
 set(SOURCE_FILES
-    test1.cpp
     test_datetime.cpp
     test_time_span.cpp
 )

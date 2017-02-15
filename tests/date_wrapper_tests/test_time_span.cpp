@@ -22,6 +22,7 @@
 #include "date_wrapper/TimeSpan.h"
 #include "gtest/gtest.h"
 
+using namespace dw;
 
 TEST(TimeSpan, test_size_in_days_should_be_at_least_one)
 {

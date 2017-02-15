@@ -42,6 +42,7 @@ void to_time_point(const std::tm& t,
         + seconds(t.tm_sec);
 }
 
+namespace dw {
 
 /* Provides date and time functions.
  *
@@ -233,5 +234,7 @@ inline bool operator>=(const DateTime& lhs, const DateTime& rhs)
 {
     return !(lhs < rhs);
 }
+
+} // namespace dw
 
 #endif /* end of include guard: DATETIME_H_RTJVB37W */

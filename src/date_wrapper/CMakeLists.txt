@@ -5,13 +5,11 @@ set(MODULE date_wrapper)
 project(${MODULE})
 
 set(SOURCE_FILES
-    src/Dummy.cpp
     src/DateTime.cpp
     src/TimeSpan.cpp
 )
 
 set(HEADER_FILES_FOR_CLION
-    include/date_wrapper/Dummy.h
     include/date_wrapper/DateTime.h
     include/date_wrapper/TimeSpan.h
 )
