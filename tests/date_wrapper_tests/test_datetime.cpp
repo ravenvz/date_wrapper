@@ -23,6 +23,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+using namespace dw;
 
 TEST(DateTime, test_constructs_correct_object_from_YMD)
 {

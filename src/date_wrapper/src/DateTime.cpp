@@ -31,6 +31,8 @@
 
 namespace {
 
+using namespace dw;
+
 template <typename T>
 void pop_back_n(T& container, size_t n)
 {
@@ -47,6 +49,8 @@ constexpr std::array<unsigned, 7> mondayFirstTable{
     {6u, 0u, 1u, 2u, 3u, 4u, 5u}};
 
 } //namespace
+
+namespace dw {
 
 DateTime::DateTime(std::chrono::system_clock::time_point timepoint)
     : time{timepoint}
@@ -198,6 +202,8 @@ std::ostream& operator<<(std::ostream& os, const DateTime& dt)
        << std::setfill('0') << std::setw(2) << dt.second();
     return os;
 }
+
+} // namespace dw
 
 namespace {
 

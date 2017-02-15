@@ -26,6 +26,7 @@
 #include <chrono>
 #include <ostream>
 
+namespace dw {
 
 /* Represent finite interval in time with start and finish points. */
 struct TimeSpan {
@@ -67,5 +68,6 @@ struct TimeSpan {
  * startTime of other TimeSpan. */
 unsigned startDateAbsDiff(const TimeSpan& one, const TimeSpan& other);
 
+} // namespace dw
 
 #endif /* end of include guard: TIMEINTERVAL_H */

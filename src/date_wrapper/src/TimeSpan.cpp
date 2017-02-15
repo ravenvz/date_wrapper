@@ -21,6 +21,7 @@
 *********************************************************************************/
 #include "date_wrapper/TimeSpan.h"
 
+namespace dw {
 
 TimeSpan::TimeSpan(SystemClock start, SystemClock finish)
     : startTime{DateTime{std::move(start)}}
@@ -76,3 +77,5 @@ unsigned startDateAbsDiff(const TimeSpan& one, const TimeSpan& other)
         return static_cast<unsigned>(other.startTime.daysTo(one.startTime));
     }
 }
+
+} // namespace dw
