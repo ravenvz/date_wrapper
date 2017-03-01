@@ -92,7 +92,7 @@ public:
     DateTime addDays(long days) const;
 
     /* Return DateTime object that is (positive or negative) integer number of
-     * months apart from current. */
+     * months apart from current. Day number is preserved. */
     DateTime addMonths(long months) const;
 
     /* Return DateTime object that is (positive or negative) integer number of

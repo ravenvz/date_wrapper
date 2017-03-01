@@ -156,6 +156,24 @@ TEST(DateTime, test_add_months_backward)
     EXPECT_EQ(17, yearBack.day());
 }
 
+TEST(DateTime, test_add_months_backward_2) {
+    DateTime dt = DateTime::fromYMD(2017, 3, 1);
+    DateTime elevenMonthsBack = dt.addMonths(-11);
+
+    EXPECT_EQ(2016, elevenMonthsBack.year());
+    EXPECT_EQ(4, elevenMonthsBack.month());
+    EXPECT_EQ(1, elevenMonthsBack.day());
+}
+
+TEST(DateTime, test_add_months_normalizes_day) {
+    DateTime dt = DateTime::fromYMD(2017, 1, 30);
+    DateTime one_month_forward = dt.addMonths(1);
+
+    EXPECT_EQ(2017, one_month_forward.year());
+    EXPECT_EQ(2, one_month_forward.month());
+    EXPECT_EQ(28, one_month_forward.day());
+}
+
 TEST(DateTime, test_computes_distance_forward)
 {
     DateTime dt = DateTime::fromYMD(2016, 11, 26);

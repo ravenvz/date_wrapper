@@ -48,6 +48,15 @@ std::string formatDateTime(const DateTime& dt, std::string&& format);
 constexpr std::array<unsigned, 7> mondayFirstTable{
     {6u, 0u, 1u, 2u, 3u, 4u, 5u}};
 
+/* If day is out of range for current month, set it to last day. */
+date::year_month_day normalize(date::year_month_day ymd)
+{
+    using namespace date;
+    if (!ymd.ok())
+        return ymd.year()/ymd.month()/last;
+    return ymd;
+}
+
 } //namespace
 
 namespace dw {
@@ -120,7 +129,14 @@ DateTime DateTime::addDays(long days) const
 
 DateTime DateTime::addMonths(long months) const
 {
-    return DateTime{time + date::months{months}};
+    using namespace date;
+    using namespace std::chrono;
+    auto y = year_month{date::year(year()), date::month(month())} + date::months{months};
+    auto t = year_month_day{y.year(), y.month(), date::day(day())};
+    t = normalize(t);
+    auto d = sys_days{t} + hours{hour()} + minutes{minute()} + seconds{second()};
+
+    return DateTime{d};
 }
 
 DateTime DateTime::addYears(long years) const
