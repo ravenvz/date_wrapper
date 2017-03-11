@@ -40,5 +40,10 @@ target_link_libraries(${MODULE} INTERFACE DateLib)
 
 target_compile_features(${MODULE} PUBLIC cxx_return_type_deduction)
 
-install(TARGETS ${MODULE} LIBRARY DESTINATION ${EXECUTABLE_INSTALL_PATH_SUFFIX})
+if (WIN32)
+    install(TARGETS ${MODULE} RUNTIME DESTINATION ${EXECUTABLE_INSTALL_PATH_SUFFIX})
+else()
+    install(TARGETS ${MODULE} LIBRARY DESTINATION ${LIBRARY_INSTALL_PATH_SUFFIX})
+endif()
+
 
