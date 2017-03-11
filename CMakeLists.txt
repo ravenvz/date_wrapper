@@ -21,9 +21,11 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 option(BUILD_TESTS ON)
 
-find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_DIR})
-include(ECMEnableSanitizers)
+if (!WIN32)
+    find_package(ECM REQUIRED NO_MODULE)
+    set(CMAKE_MODULE_PATH ${ECM_MODULE_DIR})
+    include(ECMEnableSanitizers)
+endif()
 
 set(EXECUTABLE_INSTALL_PATH_SUFFIX bin)
 set(LIBRARY_INSTALL_PATH_SUFFIX lib)
