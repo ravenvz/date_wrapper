@@ -20,8 +20,8 @@
 **
 *********************************************************************************/
 #include "date_wrapper/TimeSpan.h"
-#include <iostream>
 #include "gtest/gtest.h"
+#include <iostream>
 
 using namespace dw;
 
@@ -156,7 +156,8 @@ TEST(DateTime, test_add_months_backward)
     EXPECT_EQ(17, yearBack.day());
 }
 
-TEST(DateTime, test_add_months_backward_2) {
+TEST(DateTime, test_add_months_backward_2)
+{
     DateTime dt = DateTime::fromYMD(2017, 3, 1);
     DateTime elevenMonthsBack = dt.addMonths(-11);
 
@@ -165,7 +166,8 @@ TEST(DateTime, test_add_months_backward_2) {
     EXPECT_EQ(1, elevenMonthsBack.day());
 }
 
-TEST(DateTime, test_add_months_normalizes_day) {
+TEST(DateTime, test_add_months_normalizes_day)
+{
     DateTime dt = DateTime::fromYMD(2017, 1, 30);
     DateTime one_month_forward = dt.addMonths(1);
 
@@ -213,19 +215,19 @@ TEST(DateTime, test_computes_days_backward)
 TEST(DateTime, test_returns_correct_weekday)
 {
     EXPECT_TRUE(DateTime::Weekday::Monday
-          == DateTime::fromYMD(2016, 4, 4).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 4).dayOfWeek());
     EXPECT_TRUE(DateTime::Weekday::Tuesday
-          == DateTime::fromYMD(2016, 4, 5).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 5).dayOfWeek());
     EXPECT_TRUE(DateTime::Weekday::Wednesday
-          == DateTime::fromYMD(2016, 4, 6).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 6).dayOfWeek());
     EXPECT_TRUE(DateTime::Weekday::Thursday
-          == DateTime::fromYMD(2016, 4, 7).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 7).dayOfWeek());
     EXPECT_TRUE(DateTime::Weekday::Friday
-          == DateTime::fromYMD(2016, 4, 8).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 8).dayOfWeek());
     EXPECT_TRUE(DateTime::Weekday::Saturday
-          == DateTime::fromYMD(2016, 4, 9).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 9).dayOfWeek());
     EXPECT_TRUE(DateTime::Weekday::Sunday
-          == DateTime::fromYMD(2016, 4, 10).dayOfWeek());
+                == DateTime::fromYMD(2016, 4, 10).dayOfWeek());
 }
 
 TEST(DateTime, test_ostream_operator)
@@ -317,4 +319,69 @@ TEST(DateTime, test_comparison_operators)
     EXPECT_TRUE(before < dt);
     EXPECT_TRUE(after >= dt);
     EXPECT_TRUE(after > dt);
+}
+
+TEST(DateTime, test_construct_from_unix_timestamp)
+{
+    DateTime dt = DateTime::fromUnixTimestamp(1493644220);
+
+    EXPECT_EQ(2017, dt.year());
+    EXPECT_EQ(5, dt.month());
+    EXPECT_EQ(1, dt.day());
+    EXPECT_EQ(13, dt.hour());
+    EXPECT_EQ(10, dt.minute());
+    EXPECT_EQ(20, dt.second());
+}
+
+TEST(DateTime, test_construct_from_timestamp_with_given_precision)
+{
+    DateTime dt
+        = DateTime::fromTimestamp<std::chrono::milliseconds>(1493644220000);
+
+    EXPECT_EQ(2017, dt.year());
+    EXPECT_EQ(5, dt.month());
+    EXPECT_EQ(1, dt.day());
+    EXPECT_EQ(13, dt.hour());
+    EXPECT_EQ(10, dt.minute());
+    EXPECT_EQ(20, dt.second());
+}
+
+TEST(DateTime, test_constructs_from_timestamp_of_very_low_precision)
+{
+    DateTime dt = DateTime::fromTimestamp<std::chrono::hours>(414888);
+
+    EXPECT_EQ(2017, dt.year());
+    EXPECT_EQ(5, dt.month());
+    EXPECT_EQ(1, dt.day());
+    EXPECT_EQ(0, dt.hour());
+    EXPECT_EQ(0, dt.minute());
+    EXPECT_EQ(0, dt.second());
+}
+
+TEST(None, test_construct_from_timestamp_with_utc_offset)
+{
+    DateTime dt = DateTime::fromTimestamp<std::chrono::hours>(414888, 10800);
+
+    EXPECT_EQ(2017, dt.year());
+    EXPECT_EQ(5, dt.month());
+    EXPECT_EQ(1, dt.day());
+    EXPECT_EQ(3, dt.hour());
+    EXPECT_EQ(0, dt.minute());
+    EXPECT_EQ(0, dt.second());
+}
+
+TEST(DateTime, test_returns_unix_timestamp)
+{
+    std::tm tm_struct;
+    tm_struct.tm_year = 117;
+    tm_struct.tm_mon = 4;
+    tm_struct.tm_mday = 1;
+    tm_struct.tm_hour = 13;
+    tm_struct.tm_min = 10;
+    tm_struct.tm_sec = 20;
+    std::chrono::system_clock::time_point timepoint;
+    to_time_point(tm_struct, timepoint);
+    DateTime dt{timepoint};
+
+    EXPECT_EQ(1493644220, dt.unix_timestamp());
 }

@@ -35,6 +35,12 @@ TimeSpan::TimeSpan(const DateTime& start, const DateTime& finish)
 {
 }
 
+TimeSpan::TimeSpan(DateTime&& start, DateTime&& finish)
+    : startTime{std::move(start)}
+    , finishTime{std::move(finish)}
+{
+}
+
 TimeSpan::TimeSpan(std::time_t start,
                    std::time_t finish,
                    int offsetFromUtcInSeconds)
