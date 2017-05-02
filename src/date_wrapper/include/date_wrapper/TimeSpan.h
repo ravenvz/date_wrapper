@@ -42,6 +42,8 @@ struct TimeSpan {
     /* Construct from DateTime start and finish points. */
     TimeSpan(const DateTime& start, const DateTime& finish);
 
+    TimeSpan(DateTime&& start, DateTime&& finish);
+
     /* Construct from std::time_t start and finish points. */
     TimeSpan(std::time_t start,
              std::time_t finish,
