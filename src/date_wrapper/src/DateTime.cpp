@@ -53,21 +53,21 @@ date::year_month_day normalize(date::year_month_day ymd)
 {
     using namespace date;
     if (!ymd.ok())
-        return ymd.year()/ymd.month()/last;
+        return ymd.year() / ymd.month() / last;
     return ymd;
 }
 
-} //namespace
+} // namespace
 
 namespace dw {
 
 DateTime::DateTime(std::chrono::system_clock::time_point timepoint)
     : time{timepoint}
-    , daypoint{date::floor<date::days>(time)}
-    , ymd{date::year_month_day(daypoint)}
-    , tod{date::make_time(time - daypoint)}
+    , ymd{date::year_month_day(date::floor<date::days>(time))}
+    , tod{date::make_time(time - date::floor<date::days>(time))}
 {
 }
+
 
 /* static */
 DateTime DateTime::fromYMD(int year, int month, int day)
@@ -84,6 +84,12 @@ DateTime DateTime::fromTime_t(std::time_t timeT, int offsetFromUtcInSeconds)
 {
     return DateTime{std::chrono::system_clock::from_time_t(timeT)
                     + std::chrono::seconds{offsetFromUtcInSeconds}};
+}
+
+/* static */
+DateTime DateTime::fromUnixTimestamp(long long timestamp, int offsetFromUtcInSeconds)
+{
+    return DateTime::fromTimestamp(timestamp, offsetFromUtcInSeconds);
 }
 
 /* static */
@@ -131,10 +137,12 @@ DateTime DateTime::addMonths(long months) const
 {
     using namespace date;
     using namespace std::chrono;
-    auto y = year_month{date::year(year()), date::month(month())} + date::months{months};
+    auto y = year_month{date::year(year()), date::month(month())}
+        + date::months{months};
     auto t = year_month_day{y.year(), y.month(), date::day(day())};
     t = normalize(t);
-    auto d = sys_days{t} + hours{hour()} + minutes{minute()} + seconds{second()};
+    auto d
+        = sys_days{t} + hours{hour()} + minutes{minute()} + seconds{second()};
 
     return DateTime{d};
 }
@@ -183,6 +191,11 @@ long DateTime::yearsTo(const DateTime& other) const
 std::chrono::system_clock::time_point DateTime::chronoTimepoint() const
 {
     return time;
+}
+
+long long DateTime::unix_timestamp() const
+{
+    return timestamp<std::chrono::seconds>();
 }
 
 int DateTime::year() const { return int(ymd.year()); }

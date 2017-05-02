@@ -26,23 +26,35 @@
 #include "date.h"
 #include <sstream>
 
-
-/* Convert std::tm to std::chrono::timepoint. */
-template <typename Clock, typename Duration>
-void to_time_point(const std::tm& t,
-                   std::chrono::time_point<Clock, Duration>& tp)
-{
-    using namespace std::chrono;
-    using namespace date;
-    int y = t.tm_year + 1900;
-    auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
-    if (!ymd.ok())
-        throw std::runtime_error("Invalid date");
-    tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min)
-        + seconds(t.tm_sec);
-}
-
 namespace dw {
+
+namespace {
+
+    /* Convert std::tm to std::chrono::timepoint. */
+    template <typename Clock, typename Duration>
+    void to_time_point(const std::tm& t,
+                       std::chrono::time_point<Clock, Duration>& tp)
+    {
+        using namespace std::chrono;
+        using namespace date;
+        int y = t.tm_year + 1900;
+        auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
+        if (!ymd.ok())
+            throw std::runtime_error("Invalid date");
+        tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min)
+            + seconds(t.tm_sec);
+    }
+
+    template <typename T>
+    struct is_chrono_duration {
+        static constexpr bool value = false;
+    };
+
+    template <typename Rep, typename Period>
+    struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
+        static constexpr bool value = true;
+    };
+}
 
 /* Provides date and time functions.
  *
@@ -65,7 +77,21 @@ public:
 
     static DateTime fromYMD(int year, int month, int day);
 
-    static DateTime fromTime_t(std::time_t timeT, int offsetFromUtcInSeconds);
+    static DateTime fromTime_t(std::time_t timeT,
+                               int offsetFromUtcInSeconds = 0);
+
+    static DateTime fromUnixTimestamp(long long timestamp,
+                                      int offsetFromUtcInSeconds = 0);
+
+    /* NOTE this method is experimental and might have severe issues.
+     *
+     * Construct DateTime from timestamp of arbitrary precision
+     * expressed as std::chrono::duration
+     * Timestamp is expected to be counter from 00:00:00 UTC on 1 January 1970
+     */
+    template <typename Duration = std::chrono::seconds>
+    static DateTime fromTimestamp(long long timestamp,
+                                  int offsetFromUtcInSeconds = 0);
 
     static DateTime currentDateTime();
 
@@ -136,6 +162,21 @@ public:
     /* Return chrono time_point. */
     std::chrono::system_clock::time_point chronoTimepoint() const;
 
+    /* Return timestamp with specified std::chrono::duration.
+     * By default, returns number of seconds since Unix epoch. */
+    template <class Duration = std::chrono::seconds>
+    long long timestamp() const
+    {
+        static_assert(is_chrono_duration<Duration>::value,
+                      "duration must be a std::chrono::duration");
+        auto tp = std::chrono::time_point_cast<Duration>(time);
+        return tp.time_since_epoch().count();
+    }
+
+    /* Returns number of seconds since Unix epoch.
+     * Alias for timestamp<std::chrono::seconds>() */
+    long long unix_timestamp() const;
+
     /* Return year as integer. */
     int year() const;
 
@@ -200,7 +241,6 @@ public:
 
 private:
     std::chrono::system_clock::time_point time;
-    date::sys_days daypoint;
     date::year_month_day ymd;
     date::time_of_day<std::chrono::system_clock::duration> tod;
 };
@@ -233,6 +273,18 @@ inline bool operator<=(const DateTime& lhs, const DateTime& rhs)
 inline bool operator>=(const DateTime& lhs, const DateTime& rhs)
 {
     return !(lhs < rhs);
+}
+
+/* static */
+template <typename Duration>
+DateTime DateTime::fromTimestamp(long long timestamp,
+                                 int offsetFromUtcInSeconds)
+{
+    static_assert(is_chrono_duration<Duration>::value,
+                  "duration must be a std::chrono::duration");
+    std::chrono::system_clock::time_point time_point{
+        Duration(timestamp) + std::chrono::seconds(offsetFromUtcInSeconds)};
+    return DateTime{time_point};
 }
 
 } // namespace dw
