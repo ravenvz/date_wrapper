@@ -41,7 +41,7 @@ TEST(DateTime, test_throws_runtime_error_if_invalid_date)
     EXPECT_THROW(DateTime::fromYMD(2016, 77, 12), std::runtime_error);
 }
 
-TEST(DateTime, test_add_days_forward)
+TEST(DateTime, test_add_days_forward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 2, 20).addDays(9);
 
@@ -50,7 +50,7 @@ TEST(DateTime, test_add_days_forward)
     EXPECT_EQ(29, dt.day());
 }
 
-TEST(DateTime, test_add_days_backward)
+TEST(DateTime, test_add_days_backward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 2, 20).addDays(-10);
 
@@ -59,7 +59,7 @@ TEST(DateTime, test_add_days_backward)
     EXPECT_EQ(10, dt.day());
 }
 
-TEST(DateTime, test_add_days_backward_2)
+TEST(DateTime, test_add_days_backward_deprecated_2)
 {
     DateTime dt = DateTime::fromYMD(2016, 5, 16);
     DateTime thirtyDaysBack = dt.addDays(-30);
@@ -72,7 +72,37 @@ TEST(DateTime, test_add_days_backward_2)
     EXPECT_EQ(16, dt.day());
 }
 
-TEST(DateTime, test_add_months_forward)
+TEST(DateTime, test_add_months_backward_deprecated)
+{
+    DateTime dt = DateTime::fromYMD(2016, 5, 17);
+    DateTime yearBack = dt.addMonths(-12);
+
+    EXPECT_EQ(2015, yearBack.year());
+    EXPECT_EQ(5, yearBack.month());
+    EXPECT_EQ(17, yearBack.day());
+}
+
+TEST(DateTime, test_add_months_backward_deprecated_2)
+{
+    DateTime dt = DateTime::fromYMD(2017, 3, 1);
+    DateTime elevenMonthsBack = dt.addMonths(-11);
+
+    EXPECT_EQ(2016, elevenMonthsBack.year());
+    EXPECT_EQ(4, elevenMonthsBack.month());
+    EXPECT_EQ(1, elevenMonthsBack.day());
+}
+
+TEST(DateTime, test_add_months_normalizes_day_deprecated)
+{
+    DateTime dt = DateTime::fromYMD(2017, 1, 30);
+    DateTime one_month_forward = dt.addMonths(1);
+
+    EXPECT_EQ(2017, one_month_forward.year());
+    EXPECT_EQ(2, one_month_forward.month());
+    EXPECT_EQ(28, one_month_forward.day());
+}
+
+TEST(DateTime, test_add_months_forward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 5, 17);
     DateTime yearForward = dt.addMonths(12);
@@ -82,7 +112,7 @@ TEST(DateTime, test_add_months_forward)
     EXPECT_EQ(17, yearForward.day());
 }
 
-TEST(DateTime, test_add_years_forward)
+TEST(DateTime, test_add_years_forward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 5, 17);
     DateTime yearForward = dt.addYears(14);
@@ -92,7 +122,7 @@ TEST(DateTime, test_add_years_forward)
     EXPECT_EQ(17, yearForward.day());
 }
 
-TEST(DateTime, test_add_years_backward)
+TEST(DateTime, test_add_years_backward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 5, 17);
     DateTime yearBackward = dt.addYears(-16);
@@ -102,7 +132,7 @@ TEST(DateTime, test_add_years_backward)
     EXPECT_EQ(17, yearBackward.day());
 }
 
-TEST(DateTime, test_add_minutes_forward)
+TEST(DateTime, test_add_minutes_forward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 11, 26);
     DateTime minutesForward = dt.addMinutes(25);
@@ -113,7 +143,7 @@ TEST(DateTime, test_add_minutes_forward)
     EXPECT_EQ(25, minutesForward.minute());
 }
 
-TEST(DateTime, test_add_minutes_backward)
+TEST(DateTime, test_add_minutes_backward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 11, 26);
     DateTime minutesBackward = dt.addMinutes(-25);
@@ -124,7 +154,92 @@ TEST(DateTime, test_add_minutes_backward)
     EXPECT_EQ(35, minutesBackward.minute());
 }
 
-TEST(DateTime, test_add_hours_forward)
+TEST(DateTime, test_add_days_forward_modern)
+{
+    DateTime dt = DateTime::fromYMD(2016, 2, 20).add(DateTime::Days{9});
+
+    EXPECT_EQ(2016, dt.year());
+    EXPECT_EQ(2, dt.month());
+    EXPECT_EQ(29, dt.day());
+}
+
+TEST(DateTime, test_add_days_backward_modern)
+{
+    DateTime dt = DateTime::fromYMD(2016, 2, 20).add(DateTime::Days{-10});
+
+    EXPECT_EQ(2016, dt.year());
+    EXPECT_EQ(2, dt.month());
+    EXPECT_EQ(10, dt.day());
+}
+
+TEST(DateTime, test_add_days_backward_modern_2)
+{
+    DateTime dt = DateTime::fromYMD(2016, 5, 16);
+    DateTime thirtyDaysBack = dt.add(DateTime::Days{-30});
+
+    EXPECT_EQ(2016, thirtyDaysBack.year());
+    EXPECT_EQ(4, thirtyDaysBack.month());
+    EXPECT_EQ(16, thirtyDaysBack.day());
+    EXPECT_EQ(2016, dt.year());
+    EXPECT_EQ(5, dt.month());
+    EXPECT_EQ(16, dt.day());
+}
+
+TEST(DateTime, test_add_months_backward_modern_2)
+{
+    DateTime dt = DateTime::fromYMD(2017, 3, 1);
+    DateTime elevenMonthsBack = dt.add(DateTime::Months{-11});
+
+    EXPECT_EQ(2016, elevenMonthsBack.year());
+    EXPECT_EQ(4, elevenMonthsBack.month());
+    EXPECT_EQ(1, elevenMonthsBack.day());
+}
+
+TEST(DateTime, test_add_years_forward_modern)
+{
+    DateTime dt = DateTime::fromYMD(2016, 5, 17);
+    DateTime yearForward = dt.add(DateTime::Years{14});
+
+    EXPECT_EQ(2030, yearForward.year());
+    EXPECT_EQ(5, yearForward.month());
+    EXPECT_EQ(17, yearForward.day());
+}
+
+TEST(DateTime, test_add_years_backward_modern)
+{
+    DateTime dt = DateTime::fromYMD(2016, 5, 17);
+    DateTime yearBackward = dt.add(DateTime::Years{-16});
+
+    EXPECT_EQ(2000, yearBackward.year());
+    EXPECT_EQ(5, yearBackward.month());
+    EXPECT_EQ(17, yearBackward.day());
+}
+
+TEST(DateTime, test_add_minutes_forward_modern)
+{
+    using namespace std::chrono_literals;
+    DateTime dt = DateTime::fromYMD(2016, 11, 26);
+    DateTime minutesForward = dt.add(25min);
+
+    EXPECT_EQ(2016, minutesForward.year());
+    EXPECT_EQ(11, minutesForward.month());
+    EXPECT_EQ(26, minutesForward.day());
+    EXPECT_EQ(25, minutesForward.minute());
+}
+
+TEST(DateTime, test_add_minutes_backward_modern)
+{
+    using namespace std::chrono_literals;
+    DateTime dt = DateTime::fromYMD(2016, 11, 26);
+    DateTime minutesBackward = dt.add(-25min);
+
+    EXPECT_EQ(2016, minutesBackward.year());
+    EXPECT_EQ(11, minutesBackward.month());
+    EXPECT_EQ(25, minutesBackward.day());
+    EXPECT_EQ(35, minutesBackward.minute());
+}
+
+TEST(DateTime, test_add_hours_forward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 11, 26);
     DateTime hoursForward = dt.addHours(25);
@@ -135,7 +250,7 @@ TEST(DateTime, test_add_hours_forward)
     EXPECT_EQ(1, hoursForward.hour());
 }
 
-TEST(DateTime, test_add_hours_backward)
+TEST(DateTime, test_add_hours_backward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 11, 26);
     DateTime hoursBackward = dt.addHours(-25);
@@ -146,37 +261,31 @@ TEST(DateTime, test_add_hours_backward)
     EXPECT_EQ(23, hoursBackward.hour());
 }
 
-TEST(DateTime, test_add_months_backward)
+TEST(DateTime, test_add_hours_forward_modern)
 {
-    DateTime dt = DateTime::fromYMD(2016, 5, 17);
-    DateTime yearBack = dt.addMonths(-12);
+    using namespace std::chrono_literals;
+    DateTime dt = DateTime::fromYMD(2016, 11, 26);
+    DateTime hoursForward = dt.add(25h);
 
-    EXPECT_EQ(2015, yearBack.year());
-    EXPECT_EQ(5, yearBack.month());
-    EXPECT_EQ(17, yearBack.day());
+    EXPECT_EQ(2016, hoursForward.year());
+    EXPECT_EQ(11, hoursForward.month());
+    EXPECT_EQ(27, hoursForward.day());
+    EXPECT_EQ(1, hoursForward.hour());
 }
 
-TEST(DateTime, test_add_months_backward_2)
+TEST(DateTime, test_add_hours_backward_modern)
 {
-    DateTime dt = DateTime::fromYMD(2017, 3, 1);
-    DateTime elevenMonthsBack = dt.addMonths(-11);
+    using namespace std::chrono_literals;
+    DateTime dt = DateTime::fromYMD(2016, 11, 26);
+    DateTime hoursBackward = dt.add(-25h);
 
-    EXPECT_EQ(2016, elevenMonthsBack.year());
-    EXPECT_EQ(4, elevenMonthsBack.month());
-    EXPECT_EQ(1, elevenMonthsBack.day());
+    EXPECT_EQ(2016, hoursBackward.year());
+    EXPECT_EQ(11, hoursBackward.month());
+    EXPECT_EQ(24, hoursBackward.day());
+    EXPECT_EQ(23, hoursBackward.hour());
 }
 
-TEST(DateTime, test_add_months_normalizes_day)
-{
-    DateTime dt = DateTime::fromYMD(2017, 1, 30);
-    DateTime one_month_forward = dt.addMonths(1);
-
-    EXPECT_EQ(2017, one_month_forward.year());
-    EXPECT_EQ(2, one_month_forward.month());
-    EXPECT_EQ(28, one_month_forward.day());
-}
-
-TEST(DateTime, test_computes_distance_forward)
+TEST(DateTime, test_computes_distance_forward_deprecated)
 {
     DateTime dt = DateTime::fromYMD(2016, 11, 26);
 
@@ -205,7 +314,7 @@ TEST(DateTime, test_computes_distance_forward)
     EXPECT_EQ(-2, dt.yearsTo(dt.addYears(-2)));
 }
 
-TEST(DateTime, test_computes_days_backward)
+TEST(DateTime, test_computes_days_backward_deprecated)
 {
     DateTime currentDt = DateTime::currentDateTime();
 

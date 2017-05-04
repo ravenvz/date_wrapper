@@ -61,8 +61,11 @@ namespace {
  * It is a wrapper around Howard Hinnant's date library
  * https://github.com/HowardHinnant */
 class DateTime {
-
 public:
+    using Days = date::days;
+    using Months = date::months;
+    using Years = date::years;
+
     enum class Weekday {
         Monday,
         Tuesday,
@@ -103,27 +106,45 @@ public:
 
     /* Return DateTime object that is seconds apart from current.
      * Seconds can be negative. */
-    DateTime addSeconds(long seconds) const;
+    [[deprecated]] DateTime addSeconds(long seconds) const;
 
     /* Return DateTime object that is minutes apart from current.
      * Minutes can be negative. */
-    DateTime addMinutes(long minutes) const;
+    [[deprecated]] DateTime addMinutes(long minutes) const;
 
     /* Return DateTime object that is hours apart from current.
      * Hours can be negative. */
-    DateTime addHours(long hours) const;
+    [[deprecated]] DateTime addHours(long hours) const;
 
-    /* Return DateTime object that is (positive or negative) integer number of
-     * days apart from current. */
-    DateTime addDays(long days) const;
+    /* Return DateTime object that is (positive or negative) integer number
+     * of days apart from current. */
+    [[deprecated]] DateTime addDays(long days) const;
 
     /* Return DateTime object that is (positive or negative) integer number of
      * months apart from current. Day number is preserved. */
-    DateTime addMonths(long months) const;
+    [[deprecated]] DateTime addMonths(int months) const;
 
     /* Return DateTime object that is (positive or negative) integer number of
      * years apart from current. */
-    DateTime addYears(long years) const;
+    [[deprecated]] DateTime addYears(int years) const;
+
+    template <typename Duration>
+    DateTime add(Duration duration) const
+    {
+        static_assert(is_chrono_duration<Duration>::value,
+                      "duration must be a std::chrono::duration");
+        return DateTime{time + duration};
+    }
+
+    DateTime add(DateTime::Months duration) const;
+
+    DateTime add(DateTime::Years duration) const;
+
+    template <typename Duration>
+    DateTime operator+(Duration duration) const
+    {
+        return this->add(duration);
+    }
 
     /* Return distance in seconds to other DateTime object.
      *

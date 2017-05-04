@@ -87,7 +87,8 @@ DateTime DateTime::fromTime_t(std::time_t timeT, int offsetFromUtcInSeconds)
 }
 
 /* static */
-DateTime DateTime::fromUnixTimestamp(long long timestamp, int offsetFromUtcInSeconds)
+DateTime DateTime::fromUnixTimestamp(long long timestamp,
+                                     int offsetFromUtcInSeconds)
 {
     return DateTime::fromTimestamp(timestamp, offsetFromUtcInSeconds);
 }
@@ -115,25 +116,22 @@ std::time_t DateTime::toTime_t() const
 
 DateTime DateTime::addSeconds(long seconds) const
 {
-    return DateTime{time + std::chrono::seconds{seconds}};
+    return add(std::chrono::seconds{seconds});
 }
 
 DateTime DateTime::addMinutes(long minutes) const
 {
-    return DateTime{time + std::chrono::minutes{minutes}};
+    return add(std::chrono::minutes{minutes});
 }
 
 DateTime DateTime::addHours(long hours) const
 {
-    return DateTime{time + std::chrono::hours{hours}};
+    return add(std::chrono::hours{hours});
 }
 
-DateTime DateTime::addDays(long days) const
-{
-    return DateTime{time + date::days{days}};
-}
+DateTime DateTime::addDays(long days) const { return add(date::days{days}); }
 
-DateTime DateTime::addMonths(long months) const
+DateTime DateTime::addMonths(int months) const
 {
     using namespace date;
     using namespace std::chrono;
@@ -147,9 +145,25 @@ DateTime DateTime::addMonths(long months) const
     return DateTime{d};
 }
 
-DateTime DateTime::addYears(long years) const
+DateTime DateTime::add(DateTime::Months duration) const
 {
-    return DateTime{time + date::months{years * 12}};
+    using namespace date;
+    using namespace std::chrono;
+    auto y = year_month{date::year(year()), date::month(month())}
+        + date::months{duration.count()};
+    auto t = year_month_day{y.year(), y.month(), date::day(day())};
+    t = normalize(t);
+    auto d
+        = sys_days{t} + hours{hour()} + minutes{minute()} + seconds{second()};
+
+    return DateTime{d};
+}
+
+DateTime DateTime::addYears(int years) const { return addMonths(years * 12); }
+
+DateTime DateTime::add(DateTime::Years duration) const
+{
+    return add(std::chrono::duration_cast<DateTime::Months>(duration));
 }
 
 long long DateTime::secondsTo(const DateTime& other) const
