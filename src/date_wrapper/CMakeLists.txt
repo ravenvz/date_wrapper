@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 
 set(MODULE date_wrapper)
 
@@ -21,8 +21,6 @@ add_library(${MODULE} SHARED ${SOURCE_FILES} ${HEADER_FILES_FOR_CLION})
 
 add_dependencies(${MODULE} DateLib)
 
-target_compile_features(${MODULE} PUBLIC cxx_return_type_deduction)
-
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     target_compile_options(${MODULE} PUBLIC ${CLANG_COMPILE_OPTIONS})
 elseif(CMAKE_COMPILER_IS_GNUCXX)
@@ -38,7 +36,7 @@ target_include_directories(${MODULE}
 
 target_link_libraries(${MODULE} INTERFACE DateLib)
 
-target_compile_features(${MODULE} PUBLIC cxx_return_type_deduction)
+target_compile_features(${MODULE} PUBLIC cxx_std_17)
 
 if (WIN32)
     install(TARGETS ${MODULE} RUNTIME DESTINATION ${EXECUTABLE_INSTALL_PATH_SUFFIX})

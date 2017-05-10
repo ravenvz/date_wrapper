@@ -24,6 +24,27 @@
 
 using namespace dw;
 
+TEST(TimeSpan, test_duration)
+{
+    using namespace std::chrono_literals;
+    using namespace std::chrono;
+    DateTime start = DateTime::fromYMD(2017, 5, 10);
+    DateTime finish = start.add(25h);
+    TimeSpan ts{start, finish};
+    TimeSpan reversed{finish, start};
+
+    EXPECT_EQ(25, ts.duration<hours>().count());
+    EXPECT_EQ(1, ts.duration<DateTime::Days>().count());
+    EXPECT_EQ(0, ts.duration<DateTime::Months>().count());
+    EXPECT_EQ(1500, ts.duration<minutes>().count());
+    EXPECT_EQ(90000, ts.duration<seconds>().count());
+    EXPECT_EQ(25, reversed.duration<hours>().count());
+    EXPECT_EQ(1, reversed.duration<DateTime::Days>().count());
+    EXPECT_EQ(0, reversed.duration<DateTime::Months>().count());
+    EXPECT_EQ(1500, reversed.duration<minutes>().count());
+    EXPECT_EQ(90000, reversed.duration<seconds>().count());
+}
+
 TEST(TimeSpan, test_size_in_days_should_be_at_least_one)
 {
     DateTime dt = DateTime::fromYMD(2015, 8, 3);
@@ -34,41 +55,38 @@ TEST(TimeSpan, test_size_in_days_should_be_at_least_one)
 TEST(TimeSpan, test_returns_size_in_days)
 {
     TimeSpan timeSpan{DateTime::fromYMD(2015, 8, 3),
-                          DateTime::fromYMD(2015, 8, 4)};
+                      DateTime::fromYMD(2015, 8, 4)};
     EXPECT_EQ(2, timeSpan.sizeInDays());
 }
 
 TEST(TimeSpan, test_returns_size_in_days_from_incorrect_timeSpan)
 {
     TimeSpan timeSpan{DateTime::fromYMD(2015, 8, 18),
-                          DateTime::fromYMD(2015, 8, 3)};
+                      DateTime::fromYMD(2015, 8, 3)};
     EXPECT_EQ(16, timeSpan.sizeInDays());
 }
 
 TEST(TimeSpan, test_returns_correct_date_diff_between_timeSpans_start)
 {
     TimeSpan first{DateTime::fromYMD(2015, 8, 3),
-                       DateTime::fromYMD(2015, 8, 31)};
+                   DateTime::fromYMD(2015, 8, 31)};
     TimeSpan second{DateTime::fromYMD(2015, 8, 18),
-                        DateTime::fromYMD(2015, 8, 20)};
+                    DateTime::fromYMD(2015, 8, 20)};
     EXPECT_EQ(15, startDateAbsDiff(first, second));
 }
 
-TEST(TimeSpan,
-     test_returns_correct_date_diff_between_incorrect_timeSpans_start)
+TEST(TimeSpan, test_returns_correct_date_diff_between_incorrect_timeSpans_start)
 {
     TimeSpan first{DateTime::fromYMD(2015, 8, 18),
-                       DateTime::fromYMD(2015, 8, 20)};
+                   DateTime::fromYMD(2015, 8, 20)};
     TimeSpan second{DateTime::fromYMD(2015, 8, 3),
-                        DateTime::fromYMD(2015, 8, 31)};
+                    DateTime::fromYMD(2015, 8, 31)};
     EXPECT_EQ(15, startDateAbsDiff(first, second));
 }
 
 TEST(TimeSpan, test_date_diff_should_be_zero_between_same_timeSpans)
 {
-    TimeSpan first{DateTime::currentDateTime(),
-                       DateTime::currentDateTime()};
-    TimeSpan second{DateTime::currentDateTime(),
-                        DateTime::currentDateTime()};
+    TimeSpan first{DateTime::currentDateTime(), DateTime::currentDateTime()};
+    TimeSpan second{DateTime::currentDateTime(), DateTime::currentDateTime()};
     EXPECT_EQ(0, startDateAbsDiff(first, second));
 }
