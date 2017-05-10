@@ -26,93 +26,9 @@
 #include <algorithm>
 #include <array>
 #include <ctime>
-#include <iomanip>
 #include <iostream>
 
-namespace {
-
-using namespace dw;
-
-template <typename T>
-void pop_back_n(T& container, size_t n)
-{
-    auto limit = std::min(n, container.size());
-    for (size_t i = 0; i < limit; ++i)
-        container.pop_back();
-}
-
-bool endsWith(const std::string& str, const std::string& suffix);
-
-std::string formatDateTime(const DateTime& dt, std::string&& format);
-
-constexpr std::array<unsigned, 7> mondayFirstTable{
-    {6u, 0u, 1u, 2u, 3u, 4u, 5u}};
-
-/* If day is out of range for current month, set it to last day. */
-date::year_month_day normalize(date::year_month_day ymd)
-{
-    using namespace date;
-    if (!ymd.ok())
-        return ymd.year() / ymd.month() / last;
-    return ymd;
-}
-
-} // namespace
-
 namespace dw {
-
-DateTime::DateTime(std::chrono::system_clock::time_point timepoint)
-    : time{timepoint}
-    , ymd{date::year_month_day(date::floor<date::days>(time))}
-    , tod{date::make_time(time - date::floor<date::days>(time))}
-{
-}
-
-
-/* static */
-DateTime DateTime::fromYMD(int year, int month, int day)
-{
-    date::year_month_day dateYMD{date::year(year) / month / day};
-    if (!dateYMD.ok())
-        throw std::runtime_error("Invalid date");
-    std::chrono::system_clock::time_point tp = date::sys_days(dateYMD);
-    return DateTime{tp};
-}
-
-/* static */
-DateTime DateTime::fromTime_t(std::time_t timeT, int offsetFromUtcInSeconds)
-{
-    return DateTime{std::chrono::system_clock::from_time_t(timeT)
-                    + std::chrono::seconds{offsetFromUtcInSeconds}};
-}
-
-/* static */
-DateTime DateTime::fromUnixTimestamp(long long timestamp,
-                                     int offsetFromUtcInSeconds)
-{
-    return DateTime::fromTimestamp(timestamp, offsetFromUtcInSeconds);
-}
-
-/* static */
-DateTime DateTime::currentDateTime()
-{
-    return DateTime{std::chrono::system_clock::now()};
-}
-
-/* static */
-DateTime DateTime::currentDateTimeLocal()
-{
-    auto timepoint = std::chrono::system_clock::now();
-    std::time_t t = std::chrono::system_clock::to_time_t(timepoint);
-    std::tm localTime = *std::localtime(&t);
-    to_time_point(localTime, timepoint);
-    return DateTime{timepoint};
-}
-
-std::time_t DateTime::toTime_t() const
-{
-    return std::chrono::system_clock::to_time_t(time);
-}
 
 DateTime DateTime::addSeconds(long seconds) const
 {
@@ -145,26 +61,7 @@ DateTime DateTime::addMonths(int months) const
     return DateTime{d};
 }
 
-DateTime DateTime::add(DateTime::Months duration) const
-{
-    using namespace date;
-    using namespace std::chrono;
-    auto y = year_month{date::year(year()), date::month(month())}
-        + date::months{duration.count()};
-    auto t = year_month_day{y.year(), y.month(), date::day(day())};
-    t = normalize(t);
-    auto d
-        = sys_days{t} + hours{hour()} + minutes{minute()} + seconds{second()};
-
-    return DateTime{d};
-}
-
 DateTime DateTime::addYears(int years) const { return addMonths(years * 12); }
-
-DateTime DateTime::add(DateTime::Years duration) const
-{
-    return add(std::chrono::duration_cast<DateTime::Months>(duration));
-}
 
 long long DateTime::secondsTo(const DateTime& other) const
 {
@@ -187,153 +84,21 @@ long DateTime::hoursTo(const DateTime& other) const
 long DateTime::daysTo(const DateTime& other) const
 {
     using namespace date;
-    return (floor<days>(other.time) - floor<days>(this->time)).count();
+    return (sys_days(other.ymd) - sys_days(ymd)).count();
 }
 
 long DateTime::monthsTo(const DateTime& other) const
 {
     using namespace date;
-    return (floor<months>(other.time) - floor<months>(this->time)).count();
+    return (year_month{other.ymd.year(), other.ymd.month()}
+            - year_month{ymd.year(), ymd.month()})
+        .count();
 }
 
 long DateTime::yearsTo(const DateTime& other) const
 {
     using namespace date;
-    return (floor<years>(other.time) - floor<years>(this->time)).count();
-}
-
-std::chrono::system_clock::time_point DateTime::chronoTimepoint() const
-{
-    return time;
-}
-
-long long DateTime::unix_timestamp() const
-{
-    return timestamp<std::chrono::seconds>();
-}
-
-int DateTime::year() const { return int(ymd.year()); }
-
-unsigned DateTime::month() const { return unsigned(ymd.month()); }
-
-unsigned DateTime::day() const { return unsigned(ymd.day()); }
-
-long DateTime::hour() const { return tod.hours().count(); }
-
-long DateTime::minute() const { return tod.minutes().count(); }
-
-long long DateTime::second() const { return tod.seconds().count(); }
-
-DateTime::Weekday DateTime::dayOfWeek() const
-{
-    auto dayNumber
-        = mondayFirstTable[static_cast<unsigned>(date::weekday(ymd))];
-    return static_cast<DateTime::Weekday>(dayNumber);
-}
-
-std::string DateTime::toString(std::string format) const
-{
-    return formatDateTime(*this, std::move(format));
-}
-
-std::ostream& operator<<(std::ostream& os, const DateTime& dt)
-{
-    os << std::setfill('0') << std::setw(2) << dt.day() << "."
-       << std::setfill('0') << std::setw(2) << dt.month() << "." << dt.year()
-       << " " << std::setfill('0') << std::setw(2) << dt.hour() << ":"
-       << std::setfill('0') << std::setw(2) << dt.minute() << ":"
-       << std::setfill('0') << std::setw(2) << dt.second();
-    return os;
+    return (other.ymd.year() - ymd.year()).count();
 }
 
 } // namespace dw
-
-namespace {
-
-bool endsWith(const std::string& str, const std::string& suffix)
-{
-    if (suffix.size() > str.size())
-        return false;
-    return std::equal(suffix.crbegin(), suffix.crend(), str.crbegin());
-}
-
-std::string formatDateTime(const DateTime& dt, std::string&& format)
-{
-    std::stringstream ss;
-
-    std::string f{std::move(format)};
-    std::reverse(f.begin(), f.end());
-
-    while (!f.empty()) {
-        if (endsWith(f, "''")) {
-            ss << "'";
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "'")) {
-            pop_back_n(f, 1);
-            auto m = f.find_last_of("'");
-            if (m != std::string::npos) {
-                while (!endsWith(f, "'")) {
-                    ss << f.back();
-                    f.pop_back();
-                }
-                f.pop_back();
-            }
-        }
-        else if (endsWith(f, "yyyy")) {
-            ss << std::setfill('0') << std::setw(4) << dt.year();
-            pop_back_n(f, 4);
-        }
-        else if (endsWith(f, "yy")) {
-            ss << std::setfill('0') << std::setw(2) << dt.year() % 100;
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "MM")) {
-            ss << std::setfill('0') << std::setw(2) << dt.month();
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "M")) {
-            ss << dt.month();
-            pop_back_n(f, 1);
-        }
-        else if (endsWith(f, "dd")) {
-            ss << std::setfill('0') << std::setw(2) << dt.day();
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "d")) {
-            ss << dt.day();
-            pop_back_n(f, 1);
-        }
-        else if (endsWith(f, "hh")) {
-            ss << std::setfill('0') << std::setw(2) << dt.hour();
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "h")) {
-            ss << dt.hour();
-            pop_back_n(f, 1);
-        }
-        else if (endsWith(f, "mm")) {
-            ss << std::setfill('0') << std::setw(2) << dt.minute();
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "m")) {
-            ss << dt.minute();
-            pop_back_n(f, 1);
-        }
-        else if (endsWith(f, "ss")) {
-            ss << std::setfill('0') << std::setw(2) << dt.second();
-            pop_back_n(f, 2);
-        }
-        else if (endsWith(f, "s")) {
-            ss << dt.second();
-            pop_back_n(f, 1);
-        }
-        else {
-            ss << f.back();
-            f.pop_back();
-        }
-    }
-
-    return ss.str();
-}
-} // namespace
