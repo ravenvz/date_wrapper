@@ -33,32 +33,40 @@ struct TimeSpan {
 
     using SystemClock = std::chrono::system_clock::time_point;
 
-    DateTime startTime;
-    DateTime finishTime;
+    // TODO make them private
+    const DateTime startTime;
+    const DateTime finishTime;
+
+    constexpr DateTime start() const noexcept;
+    constexpr DateTime finish() const noexcept;
 
     /* Construct from chrono time_point. */
-    TimeSpan(SystemClock start, SystemClock finish);
+    constexpr TimeSpan(SystemClock start, SystemClock finish) noexcept;
 
-    /* Construct from DateTime start and finish points. */
-    TimeSpan(const DateTime& start, const DateTime& finish);
-
-    TimeSpan(DateTime&& start, DateTime&& finish);
+    constexpr TimeSpan(DateTime start, DateTime finish) noexcept;
 
     /* Construct from std::time_t start and finish points. */
     TimeSpan(std::time_t start,
              std::time_t finish,
-             int offsetFromUtcInSeconds = 0);
+             int offsetFromUtcInSeconds = 0) noexcept;
 
     /* Return time span size in days as unsigned integer.
      *
      * TODO change to signed integer (long long) type
      * It doesn't matter if start point is further in time compared to
      * finish point. */
-    unsigned sizeInDays() const;
+    [[deprecated]] unsigned sizeInDays() const;
+
+    /* Return size of TimeInterval with specified Duration.
+     * Duration is restricted to std::chrono::duration type.
+     */
+    template <class Duration>
+    constexpr Duration duration() const noexcept;
 
     /* Return string representation of TimeSpan. The result is determined
      * by format string that is applied both to start and finish DateTime
      * objects, separated by sep string.
+     * See also documentation for DateTime::toString.
      */
     std::string toString(const std::string& format,
                          std::string sep = " - ") const;
@@ -68,7 +76,42 @@ struct TimeSpan {
 
 /* Return absolute number of days between startTime of this TimeSpan and
  * startTime of other TimeSpan. */
-unsigned startDateAbsDiff(const TimeSpan& one, const TimeSpan& other);
+[[deprecated]] unsigned startDateAbsDiff(const TimeSpan& one,
+                                         const TimeSpan& other);
+
+constexpr TimeSpan::TimeSpan(SystemClock start, SystemClock finish) noexcept
+    : startTime{DateTime{std::move(start)}}
+    , finishTime{DateTime{std::move(finish)}}
+{
+}
+
+constexpr TimeSpan::TimeSpan(DateTime start, DateTime finish) noexcept
+    : startTime{std::move(start)}
+    , finishTime{std::move(finish)}
+{
+}
+
+inline TimeSpan::TimeSpan(std::time_t start,
+                          std::time_t finish,
+                          int offsetFromUtcInSeconds) noexcept
+    : startTime{DateTime::fromTime_t(start, offsetFromUtcInSeconds)}
+    , finishTime{DateTime::fromTime_t(finish, offsetFromUtcInSeconds)}
+{
+}
+
+constexpr DateTime TimeSpan::start() const noexcept { return startTime; }
+
+constexpr DateTime TimeSpan::finish() const noexcept { return finishTime; }
+
+template <class Duration>
+inline constexpr Duration TimeSpan::duration() const noexcept
+{
+    using namespace std::chrono;
+    static_assert(is_chrono_duration<Duration>::value,
+                  "duration must be a std::chrono::duration");
+    return date::abs(duration_cast<Duration>(finishTime.chronoTimepoint()
+                                             - startTime.chronoTimepoint()));
+}
 
 } // namespace dw
 

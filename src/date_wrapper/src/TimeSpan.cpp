@@ -23,32 +23,6 @@
 
 namespace dw {
 
-TimeSpan::TimeSpan(SystemClock start, SystemClock finish)
-    : startTime{DateTime{std::move(start)}}
-    , finishTime{DateTime{std::move(finish)}}
-{
-}
-
-TimeSpan::TimeSpan(const DateTime& start, const DateTime& finish)
-    : startTime{start}
-    , finishTime{finish}
-{
-}
-
-TimeSpan::TimeSpan(DateTime&& start, DateTime&& finish)
-    : startTime{std::move(start)}
-    , finishTime{std::move(finish)}
-{
-}
-
-TimeSpan::TimeSpan(std::time_t start,
-                   std::time_t finish,
-                   int offsetFromUtcInSeconds)
-    : startTime{DateTime::fromTime_t(start, offsetFromUtcInSeconds)}
-    , finishTime{DateTime::fromTime_t(finish, offsetFromUtcInSeconds)}
-{
-}
-
 unsigned TimeSpan::sizeInDays() const
 {
     if (startTime <= finishTime) {
