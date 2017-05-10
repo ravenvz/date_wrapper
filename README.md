@@ -1,12 +1,6 @@
 # date_wrapper
-Wrapper for tiny subset of the excellent [Howard Hinnant's date lib](https://github.com/HowardHinnant/date)
+Wrapper for a subset of the excellent [Howard Hinnant's date library](https://github.com/HowardHinnant/date) that provides DateTime and TimeInterval abstractions.
 
-Howard Hinnant's library is in active development and API changes are expected, therefore this wrapper was created.
+**date_wrapper** was created to provide bridge to Howard Hinnant's library, that was in active development and API changes were possible.
 
-**date_wrapper** provides (arguably easy to use) DateTime and TimeInterval classes.
-
-**date_wrapper** is intented to be used in small projects or prototypes, when you want to have date-time abstractions and
-want them right now, so you can focus on your main features or try new concepts. 
-It is not production-ready and never will be - dates and time are one of the most complex matters with great number of pitfalls.
-
-# integrating in your cmake project
+Howard Hinnant's library is now proposed to standartization; if this happens, this wrapper might be obsolete, although provided abstractions still might be useful.
