@@ -34,8 +34,8 @@ struct TimeSpan {
     using SystemClock = std::chrono::system_clock::time_point;
 
     // TODO make them private
-    const DateTime startTime;
-    const DateTime finishTime;
+    DateTime startTime;
+    DateTime finishTime;
 
     constexpr DateTime start() const noexcept;
     constexpr DateTime finish() const noexcept;
