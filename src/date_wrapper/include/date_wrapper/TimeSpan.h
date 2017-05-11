@@ -50,13 +50,6 @@ struct TimeSpan {
              std::time_t finish,
              int offsetFromUtcInSeconds = 0) noexcept;
 
-    /* Return time span size in days as unsigned integer.
-     *
-     * TODO change to signed integer (long long) type
-     * It doesn't matter if start point is further in time compared to
-     * finish point. */
-    [[deprecated]] unsigned sizeInDays() const;
-
     /* Return size of TimeInterval with specified Duration.
      * Duration is restricted to std::chrono::duration type.
      */
@@ -73,11 +66,6 @@ struct TimeSpan {
 
     friend std::ostream& operator<<(std::ostream& os, const TimeSpan& span);
 };
-
-/* Return absolute number of days between startTime of this TimeSpan and
- * startTime of other TimeSpan. */
-[[deprecated]] unsigned startDateAbsDiff(const TimeSpan& one,
-                                         const TimeSpan& other);
 
 constexpr TimeSpan::TimeSpan(SystemClock start, SystemClock finish) noexcept
     : startTime{DateTime{std::move(start)}}

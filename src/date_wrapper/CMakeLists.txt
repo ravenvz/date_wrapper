@@ -5,8 +5,6 @@ set(MODULE date_wrapper)
 project(${MODULE})
 
 set(SOURCE_FILES
-    src/DateTime.cpp
-    src/TimeSpan.cpp
 )
 
 set(HEADER_FILES_FOR_CLION
@@ -17,26 +15,26 @@ set(HEADER_FILES_FOR_CLION
 include(ExternalProject)
 include(CMakeLists-datelib.txt)
 
-add_library(${MODULE} SHARED ${SOURCE_FILES} ${HEADER_FILES_FOR_CLION})
+add_library(${MODULE} INTERFACE)
 
 add_dependencies(${MODULE} DateLib)
 
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    target_compile_options(${MODULE} PUBLIC ${CLANG_COMPILE_OPTIONS})
-elseif(CMAKE_COMPILER_IS_GNUCXX)
-    target_compile_options(${MODULE} PUBLIC ${GCC_COMPILE_OPTIONS})
-else()
-    message(${CMAKE_COMPILER_ID} "compiler might not be supported yet.")
-endif()
+# if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+#     target_compile_options(${MODULE} PUBLIC ${CLANG_COMPILE_OPTIONS})
+# elseif(CMAKE_COMPILER_IS_GNUCXX)
+#     target_compile_options(${MODULE} PUBLIC ${GCC_COMPILE_OPTIONS})
+# else()
+#     message(${CMAKE_COMPILER_ID} "compiler might not be supported yet.")
+# endif()
 
 target_include_directories(${MODULE}
-    PUBLIC include
-    PUBLIC ${DateLib_INCLUDE_DIRS}
+    INTERFACE include
+    INTERFACE ${DateLib_INCLUDE_DIRS}
 )
 
 target_link_libraries(${MODULE} INTERFACE DateLib)
 
-target_compile_features(${MODULE} PUBLIC cxx_std_17)
+target_compile_features(${MODULE} INTERFACE cxx_std_17)
 
 if (WIN32)
     install(TARGETS ${MODULE} RUNTIME DESTINATION ${EXECUTABLE_INSTALL_PATH_SUFFIX})

@@ -110,30 +110,6 @@ public:
     /* Return std::time_t representation. */
     std::time_t toTime_t() const noexcept;
 
-    /* Return DateTime object that is seconds apart from current.
-     * Seconds can be negative. */
-    [[deprecated]] DateTime addSeconds(long seconds) const;
-
-    /* Return DateTime object that is minutes apart from current.
-     * Minutes can be negative. */
-    [[deprecated]] DateTime addMinutes(long minutes) const;
-
-    /* Return DateTime object that is hours apart from current.
-     * Hours can be negative. */
-    [[deprecated]] DateTime addHours(long hours) const;
-
-    /* Return DateTime object that is (positive or negative) integer number
-     * of days apart from current. */
-    [[deprecated]] DateTime addDays(long days) const;
-
-    /* Return DateTime object that is (positive or negative) integer number of
-     * months apart from current. Day number is preserved. */
-    [[deprecated]] DateTime addMonths(int months) const;
-
-    /* Return DateTime object that is (positive or negative) integer number of
-     * years apart from current. */
-    [[deprecated]] DateTime addYears(int years) const;
-
     /* Return new DateTime object that stands apart in time by given duration.
      * Duration template parameter is restricted to std::chono::duration type.
      */
@@ -152,21 +128,6 @@ public:
     template <typename Duration = std::chrono::system_clock::duration>
     constexpr Duration differenceBetween(const DateTime& other) const noexcept;
 
-    /* Return distance in seconds to other DateTime object.
-     *
-     * If other DateTime object is behind in time, result will be negative. */
-    [[deprecated]] long long secondsTo(const DateTime& other) const;
-
-    /* Return distance in minutes to other DateTime object.
-     *
-     * If other DateTime object is behind in time, result will be negative. */
-    [[deprecated]] long minutesTo(const DateTime& other) const;
-
-    /* Return distance in hours to other DateTime object.
-     *
-     * If other DateTime object is behind in time, result will be negative. */
-    [[deprecated]] long hoursTo(const DateTime& other) const;
-
     /* Return distance in calendar days to other DateTime object.
      *
      * If other DateTime object is behind in time, result will be negative.
@@ -176,20 +137,6 @@ public:
      * 12.04.2016 00:01 is equal to one day. */
     constexpr int discreteDaysTo(const DateTime& other) const noexcept;
 
-    /* Return distance in days to other DateTime object.
-     *
-     * If other DateTime object is behind in time, result will be negative.
-     *
-     * Number of days is a number of times midnight is encountered between
-     * two DateTime objects. So distance between 11.04.2016 23:59 and
-     * 12.04.2016 00:01 is equal to one day. */
-    [[deprecated]] long daysTo(const DateTime& other) const;
-
-    /* Return distance in months to other DateTime object.
-     *
-     * If other DateTime object is behind in time, result will be negative. */
-    [[deprecated]] long monthsTo(const DateTime& other) const;
-
     /* Return distance in calendar months to other DateTime object.
      *
      * If other DateTime object is behind in time, result will be negative. */
@@ -198,11 +145,6 @@ public:
     template <class Duration>
     constexpr long long discreteDistanceTo(const DateTime& other) const
         noexcept;
-
-    /* Return distance in years to other DateTime object.
-     *
-     * If other DateTime object is behind in time, result will be negative. */
-    [[deprecated]] long yearsTo(const DateTime& other) const;
 
     /* Return distance in calendar years to other DateTime object.
      *
