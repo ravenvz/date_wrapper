@@ -21,6 +21,7 @@ set(DateLib_INCLUDE_DIRS "${source_dir}")
 set(Datelib_include_dirs_cmake_bug_wround ${DateLib_INCLUDE_DIRS})
 
 add_library(DateLib INTERFACE)
+target_include_directories(DateLib INTERFACE ${source_dir})
 
 # target_sources(DateLib INTERFACE
 #       ${CMAKE_CURRENT_SOURCE_DIR}/lib/date/date.h
