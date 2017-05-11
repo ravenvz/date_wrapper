@@ -33,10 +33,6 @@ struct TimeSpan {
 
     using SystemClock = std::chrono::system_clock::time_point;
 
-    // TODO make them private
-    DateTime startTime;
-    DateTime finishTime;
-
     constexpr DateTime start() const noexcept;
     constexpr DateTime finish() const noexcept;
 
@@ -65,6 +61,10 @@ struct TimeSpan {
                          std::string sep = " - ") const;
 
     friend std::ostream& operator<<(std::ostream& os, const TimeSpan& span);
+
+private:
+    DateTime startTime;
+    DateTime finishTime;
 };
 
 constexpr TimeSpan::TimeSpan(SystemClock start, SystemClock finish) noexcept
