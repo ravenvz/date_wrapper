@@ -101,6 +101,21 @@ inline constexpr Duration TimeSpan::duration() const noexcept
                                              - startTime.chronoTimepoint()));
 }
 
+inline std::string TimeSpan::toString(const std::string& format, std::string sep) const
+{
+    std::stringstream ss;
+    std::string separator{std::move(sep)};
+    ss << startTime.toString(format) << separator
+       << finishTime.toString(format);
+    return ss.str();
+}
+
+inline std::ostream& operator<<(std::ostream& os, const TimeSpan& span)
+{
+    os << "TimeSpan {" << span.startTime << ", " << span.finishTime << "}";
+    return os;
+}
+
 } // namespace dw
 
 #endif /* end of include guard: TIMEINTERVAL_H */
