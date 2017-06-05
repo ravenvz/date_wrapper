@@ -241,8 +241,8 @@ private:
 inline constexpr DateTime::DateTime(
     std::chrono::system_clock::time_point timepoint) noexcept
     : time{timepoint}
-    , ymd{date::year_month_day(date::floor<date::days>(time))}
-    , tod{date::make_time(time - date::floor<date::days>(time))}
+    , ymd{date::year_month_day(std::chrono::floor<date::days>(time))}
+    , tod{date::make_time(time - std::chrono::floor<date::days>(time))}
 {
 }
 
