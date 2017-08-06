@@ -24,6 +24,7 @@
 
 #include "date.h"
 #include <algorithm>
+#include <array>
 #include <iomanip>
 #include <sstream>
 
