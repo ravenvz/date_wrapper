@@ -1,3 +1,7 @@
 build
 third_party
 *.vim
+.vs
+CMakeSettings.json
+CppProperties.json
+bin
