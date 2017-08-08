@@ -24,6 +24,7 @@
 #include <iostream>
 
 using namespace dw;
+using namespace dw::utils;
 
 TEST(DateTime, test_constructs_correct_object_from_YMD)
 {

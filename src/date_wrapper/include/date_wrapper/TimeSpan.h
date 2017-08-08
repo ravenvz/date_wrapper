@@ -95,7 +95,7 @@ template <class Duration>
 inline constexpr Duration TimeSpan::duration() const noexcept
 {
     using namespace std::chrono;
-    static_assert(is_chrono_duration<Duration>::value,
+    static_assert(utils::is_chrono_duration<Duration>::value,
                   "duration must be a std::chrono::duration");
     return date::abs(duration_cast<Duration>(finishTime.chronoTimepoint()
                                              - startTime.chronoTimepoint()));
