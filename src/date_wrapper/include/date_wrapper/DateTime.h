@@ -441,7 +441,7 @@ inline constexpr Duration
 DateTime::differenceBetween(const DateTime& other) const noexcept
 {
     using namespace std::chrono;
-    static_assert(is_chrono_duration<Duration>::value,
+    static_assert(utils::is_chrono_duration<Duration>::value,
                   "duration must be a std::chrono::duration");
     return duration_cast<Duration>(other.time - time);
 }
