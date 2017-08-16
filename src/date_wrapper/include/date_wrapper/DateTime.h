@@ -211,144 +211,133 @@ private:
 
 namespace utils {
 
-constexpr std::array<unsigned, 7> mondayFirstTable{
-	{6u, 0u, 1u, 2u, 3u, 4u, 5u}};
+    constexpr std::array<unsigned, 7> mondayFirstTable{
+        {6u, 0u, 1u, 2u, 3u, 4u, 5u}};
 
-/* Convert std::tm to std::chrono::timepoint. */
-template <typename Clock, typename Duration>
-void to_time_point(const std::tm& t,
-				   std::chrono::time_point<Clock, Duration>& tp)
-{
-	using namespace std::chrono;
-	using namespace date;
-	int y = t.tm_year + 1900;
-	auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
-	if (!ymd.ok())
-		throw std::runtime_error("Invalid date");
-	tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min)
-		+ seconds(t.tm_sec);
-}
+    /* Convert std::tm to std::chrono::timepoint. */
+    template <typename Clock, typename Duration>
+    void to_time_point(const std::tm& t,
+                       std::chrono::time_point<Clock, Duration>& tp)
+    {
+        using namespace std::chrono;
+        using namespace date;
+        int y = t.tm_year + 1900;
+        auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
+        if (!ymd.ok())
+            throw std::runtime_error("Invalid date");
+        tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min)
+            + seconds(t.tm_sec);
+    }
 
-constexpr date::year_month_day normalize(date::year_month_day ymd) noexcept;
+    constexpr date::year_month_day normalize(date::year_month_day ymd) noexcept;
 
-template <typename T>
-struct is_chrono_duration {
-	static constexpr bool value = false;
-};
+    template <typename T>
+    struct is_chrono_duration {
+        static constexpr bool value = false;
+    };
 
-template <typename Rep, typename Period>
-struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
-	static constexpr bool value = true;
-};
+    template <typename Rep, typename Period>
+    struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
+        static constexpr bool value = true;
+    };
 
-inline constexpr date::year_month_day
-normalize(date::year_month_day ymd) noexcept
-{
-	using namespace date;
-	if (!ymd.ok())
-		return ymd.year() / ymd.month() / last;
-	return ymd;
-}
+    inline constexpr date::year_month_day
+    normalize(date::year_month_day ymd) noexcept
+    {
+        using namespace date;
+        if (!ymd.ok())
+            return ymd.year() / ymd.month() / last;
+        return ymd;
+    }
 
-template <typename T>
-void pop_back_n(T& container, size_t n)
-{
-	auto limit = std::min(n, container.size());
-	for (size_t i = 0; i < limit; ++i)
-		container.pop_back();
-}
+    inline bool startsWith(const std::string_view& str, const std::string_view& prefix)
+    {
+        if (prefix.size() > str.size())
+            return false;
+        return std::equal(prefix.cbegin(), prefix.cend(), str.cbegin());
+    }
 
-inline bool endsWith(const std::string& str, char ch)
-{
-	return !str.empty() && str.back() == ch;
-}
+    inline bool startsWith(const std::string_view& str, char ch)
+    {
+        return !str.empty() && str[0] == ch;
+    }
 
-inline bool endsWith(const std::string& str, const std::string& suffix)
-{
-	if (suffix.size() > str.size())
-		return false;
-	return std::equal(suffix.crbegin(), suffix.crend(), str.crbegin());
-}
+    inline std::string formatDateTime(const DateTime& dt,
+                                      std::string_view format)
+    {
+        std::stringstream ss;
 
-inline std::string formatDateTime(const DateTime& dt, std::string&& format)
-{
-	std::stringstream ss;
+        while (!format.empty()) {
+            if (startsWith(format, "''")) {
+                ss << '\'';
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, '\'')) {
+                format.remove_prefix(1);
+                if (format.find_first_of('\'') != std::string_view::npos) {
+                    while (!startsWith(format, '\'')) {
+                        ss << format.front();
+                        format.remove_prefix(1);
+                    }
+                    format.remove_prefix(1);
+                }
+            }
+            else if (startsWith(format, "yyyy")) {
+                ss << std::setfill('0') << std::setw(4) << dt.year();
+                format.remove_prefix(4);
+            }
+            else if (startsWith(format, "yy")) {
+                ss << std::setfill('0') << std::setw(2) << dt.year() % 100;
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, "MM")) {
+                ss << std::setfill('0') << std::setw(2) << dt.month();
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, 'M')) {
+                ss << dt.month();
+                format.remove_prefix(1);
+            }
+            else if (startsWith(format, "dd")) {
+                ss << std::setfill('0') << std::setw(2) << dt.day();
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, 'd')) {
+                ss << dt.day();
+                format.remove_prefix(1);
+            }
+            else if (startsWith(format, "hh")) {
+                ss << std::setfill('0') << std::setw(2) << dt.hour();
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, 'h')) {
+                ss << dt.hour();
+                format.remove_prefix(1);
+            }
+            else if (startsWith(format, "mm")) {
+                ss << std::setfill('0') << std::setw(2) << dt.minute();
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, 'm')) {
+                ss << dt.minute();
+                format.remove_prefix(1);
+            }
+            else if (startsWith(format, "ss")) {
+                ss << std::setfill('0') << std::setw(2) << dt.second();
+                format.remove_prefix(2);
+            }
+            else if (startsWith(format, 's')) {
+                ss << dt.second();
+                format.remove_prefix(1);
+            }
+            else {
+                ss << format.front();
+                format.remove_prefix(1);
+            }
+        }
 
-	std::string f{std::move(format)};
-	std::reverse(f.begin(), f.end());
-
-	while (!f.empty()) {
-		if (endsWith(f, "''")) {
-			ss << '\'';
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, '\'')) {
-			pop_back_n(f, 1);
-			auto m = f.find_last_of('\'');
-			if (m != std::string::npos) {
-				while (!endsWith(f, '\'')) {
-					ss << f.back();
-					f.pop_back();
-				}
-				f.pop_back();
-			}
-		}
-		else if (endsWith(f, "yyyy")) {
-			ss << std::setfill('0') << std::setw(4) << dt.year();
-			pop_back_n(f, 4);
-		}
-		else if (endsWith(f, "yy")) {
-			ss << std::setfill('0') << std::setw(2) << dt.year() % 100;
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, "MM")) {
-			ss << std::setfill('0') << std::setw(2) << dt.month();
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, 'M')) {
-			ss << dt.month();
-			pop_back_n(f, 1);
-		}
-		else if (endsWith(f, "dd")) {
-			ss << std::setfill('0') << std::setw(2) << dt.day();
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, 'd')) {
-			ss << dt.day();
-			pop_back_n(f, 1);
-		}
-		else if (endsWith(f, "hh")) {
-			ss << std::setfill('0') << std::setw(2) << dt.hour();
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, 'h')) {
-			ss << dt.hour();
-			pop_back_n(f, 1);
-		}
-		else if (endsWith(f, "mm")) {
-			ss << std::setfill('0') << std::setw(2) << dt.minute();
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, 'm')) {
-			ss << dt.minute();
-			pop_back_n(f, 1);
-		}
-		else if (endsWith(f, "ss")) {
-			ss << std::setfill('0') << std::setw(2) << dt.second();
-			pop_back_n(f, 2);
-		}
-		else if (endsWith(f, 's')) {
-			ss << dt.second();
-			pop_back_n(f, 1);
-		}
-		else {
-			ss << f.back();
-			f.pop_back();
-		}
-	}
-
-	return ss.str();
-}
+        return ss.str();
+    }
 
 } // namespace utils
 
