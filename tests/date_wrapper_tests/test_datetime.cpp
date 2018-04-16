@@ -378,3 +378,13 @@ TEST(DateTime, test_returns_unix_timestamp)
 
     EXPECT_EQ(1493644220, dt.unix_timestamp());
 }
+
+TEST(DateTime, test_iso_weeknumber) {
+    EXPECT_EQ(16, DateTime::fromYMD(2018, 4, 16).iso_weeknum());
+    EXPECT_EQ(16, DateTime::fromYMD(2018, 4, 22).iso_weeknum());
+    EXPECT_EQ(53, DateTime::fromYMD(2015, 12, 28).iso_weeknum());
+    EXPECT_EQ(53, DateTime::fromYMD(2016, 1, 3).iso_weeknum());
+    EXPECT_EQ(1, DateTime::fromYMD(2016, 1, 4).iso_weeknum());
+    EXPECT_EQ(52, DateTime::fromYMD(2017, 1, 1).iso_weeknum());
+    EXPECT_EQ(1, DateTime::fromYMD(2017, 1, 2).iso_weeknum());
+}
