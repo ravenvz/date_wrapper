@@ -23,7 +23,6 @@
 #define DATETIME_H_RTJVB37W
 
 #include <date/date.h>
-#include <date/iso_week.h>
 #include <algorithm>
 #include <array>
 #include <iomanip>
@@ -156,9 +155,6 @@ public:
 
     /* Return day of week. */
     constexpr Weekday dayOfWeek() const noexcept;
-
-    /* Return iso week number */
-    constexpr unsigned iso_weeknum() const noexcept;
 
     /* Return string representation of DateTime.
      * The format parameter determines the format of the result string.
@@ -522,13 +518,6 @@ constexpr DateTime::Weekday DateTime::dayOfWeek() const noexcept
     auto dayNumber
         = utils::mondayFirstTable[static_cast<unsigned>(date::weekday(ymd))];
     return static_cast<DateTime::Weekday>(dayNumber);
-}
-
-constexpr unsigned DateTime::iso_weeknum() const noexcept
-{
-    auto dp = date::floor<iso_week::days>(time);
-    iso_week::year_weeknum_weekday iso_date{dp};
-    return static_cast<unsigned>(iso_date.weeknum());
 }
 
 inline std::string DateTime::toString(std::string format) const
