@@ -29,7 +29,6 @@ add_dependencies(${MODULE} DateLib)
 
 target_include_directories(${MODULE}
     INTERFACE include
-    INTERFACE ${DateLib_INCLUDE_DIRS}
 )
 
 target_link_libraries(${MODULE} INTERFACE DateLib)
