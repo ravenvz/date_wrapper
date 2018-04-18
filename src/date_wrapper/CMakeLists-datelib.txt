@@ -2,7 +2,7 @@ ExternalProject_Add(
   DateLibExternal
 
   GIT_REPOSITORY "https://github.com/HowardHinnant/date"
-  GIT_TAG "v2.2"
+  GIT_TAG "v2.4.1"
 
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
@@ -15,16 +15,11 @@ ExternalProject_Add(
 )
 
 ExternalProject_Get_Property(DateLibExternal source_dir)
-set(DateLib_INCLUDE_DIRS "${source_dir}")
 
 # Workaround against Cmake not downloading lib before using it
-set(Datelib_include_dirs_cmake_bug_wround ${DateLib_INCLUDE_DIRS})
+set(Datelib_include_dirs_cmake_bug_wround ${source_dir})
 
 add_library(DateLib INTERFACE)
-target_include_directories(DateLib INTERFACE ${source_dir})
-
-# target_sources(DateLib INTERFACE
-#       ${CMAKE_CURRENT_SOURCE_DIR}/lib/date/date.h
-# )
+target_include_directories(DateLib INTERFACE ${source_dir}/include)
 
 add_dependencies(DateLib DateLibExternal)
