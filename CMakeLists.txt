@@ -19,7 +19,7 @@ set(THIRD_PARTY_LIBS_FOLDER third_party)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-option(BUILD_TESTS ON)
+option(BUILD_TESTS OFF)
 
 if (!WIN32)
     find_package(ECM REQUIRED NO_MODULE)
