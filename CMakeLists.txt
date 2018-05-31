@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.11)
 
 set(PROJECT date_wrapper_project)
 
@@ -31,6 +31,9 @@ set(EXECUTABLE_INSTALL_PATH_SUFFIX bin)
 set(LIBRARY_INSTALL_PATH_SUFFIX lib)
 
 add_subdirectory(src/date_wrapper)
+
 if (BUILD_TESTS)
+	enable_testing()
+	include(GoogleTest)
     add_subdirectory(tests)
 endif()
