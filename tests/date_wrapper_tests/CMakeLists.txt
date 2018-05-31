@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.11)
 
 set(MODULE_TEST date_wrapper_tests)
 
@@ -11,6 +11,7 @@ set(SOURCE_FILES
 
 add_executable(${MODULE_TEST} ${SOURCE_FILES})
 
-add_dependencies(${MODULE_TEST} gtest gtest_main gmock)
+target_link_libraries(${MODULE_TEST} date_wrapper gtest_main)
 
-target_link_libraries(${MODULE_TEST} date_wrapper gtest gtest_main gmock)
+gtest_add_tests(TARGET ${MODULE_TEST} TEST_PREFIX old:)
+# gtest_discover_tests(${MODULE_TEST})
