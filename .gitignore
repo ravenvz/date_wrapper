@@ -6,3 +6,4 @@ CMakeSettings.json
 CppProperties.json
 bin
 lib
+*.swp
