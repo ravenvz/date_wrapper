@@ -1,12 +1,17 @@
 # TODO build against specific release branch
 # Now it only builds against master with MSVC 2017
+if (MSVC)
+    set(TAG_WORKAROUND "master")
+else()
+    set(TAG_WORKAROUND "release-1.8.0")
+endif()
 
 include(FetchContent)
 
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        master
+  GIT_TAG        ${TAG_WORKAROUND}
 )
 
 FetchContent_GetProperties(googletest)
@@ -15,6 +20,7 @@ if(NOT googletest_POPULATED)
 
     # Prevent overriding the parent's project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE INTERNAL "")
+	set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
 
