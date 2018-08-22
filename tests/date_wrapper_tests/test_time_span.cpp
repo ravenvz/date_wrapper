@@ -24,7 +24,7 @@
 
 using namespace dw;
 
-TEST(TimeSpan, test_duration)
+TEST(TimeSpan, returns_correct_durations)
 {
     using namespace std::chrono_literals;
     using namespace std::chrono;
@@ -43,4 +43,15 @@ TEST(TimeSpan, test_duration)
     EXPECT_EQ(0, reversed.duration<DateTime::Months>().count());
     EXPECT_EQ(1500, reversed.duration<minutes>().count());
     EXPECT_EQ(90000, reversed.duration<seconds>().count());
+}
+
+TEST(TimeSpan, timespan_equality)
+{
+    using namespace std::chrono_literals;
+    DateTime start{DateTime::currentDateTime()};
+    DateTime finish{DateTime::currentDateTime()};
+
+    EXPECT_EQ(TimeSpan(start, finish), TimeSpan(start, finish));
+    EXPECT_NE(TimeSpan(start.add(1s), finish), TimeSpan(start, finish));
+    EXPECT_NE(TimeSpan(start, finish.add(1s)), TimeSpan(start, finish));
 }

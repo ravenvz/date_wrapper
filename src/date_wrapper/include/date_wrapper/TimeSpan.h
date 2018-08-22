@@ -101,7 +101,8 @@ inline constexpr Duration TimeSpan::duration() const noexcept
                                              - startTime.chronoTimepoint()));
 }
 
-inline std::string TimeSpan::toString(const std::string& format, std::string sep) const
+inline std::string TimeSpan::toString(const std::string& format,
+                                      std::string sep) const
 {
     std::stringstream ss;
     std::string separator{std::move(sep)};
@@ -114,6 +115,16 @@ inline std::ostream& operator<<(std::ostream& os, const TimeSpan& span)
 {
     os << "TimeSpan {" << span.startTime << ", " << span.finishTime << "}";
     return os;
+}
+
+inline bool operator!=(const TimeSpan& lhs, const TimeSpan& rhs)
+{
+    return lhs.start() != rhs.start() || lhs.finish() != rhs.finish();
+}
+
+inline bool operator==(const TimeSpan& lhs, const TimeSpan& rhs)
+{
+    return !(lhs != rhs);
 }
 
 } // namespace dw
