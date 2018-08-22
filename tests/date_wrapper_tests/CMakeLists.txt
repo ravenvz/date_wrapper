@@ -4,14 +4,15 @@ set(MODULE_TEST date_wrapper_tests)
 
 project(${MODULE_TEST})
 
-set(SOURCE_FILES
-    test_datetime.cpp
-    test_time_span.cpp
-)
-
 add_executable(${MODULE_TEST} ${SOURCE_FILES})
+
+target_sources(${MODULE_TEST}
+    PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/test_datetime.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/test_time_span.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/test_iso_date.cpp"
+)
 
 target_link_libraries(${MODULE_TEST} date_wrapper gtest_main)
 
-gtest_add_tests(TARGET ${MODULE_TEST} TEST_PREFIX old:)
-# gtest_discover_tests(${MODULE_TEST})
+gtest_discover_tests(${MODULE_TEST})
