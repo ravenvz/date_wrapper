@@ -2,23 +2,17 @@ set(MODULE date_wrapper)
 
 project(${MODULE})
 
-set(HEADER_FILES_FOR_CLION
-    include/date_wrapper/DateTime.h
-    include/date_wrapper/TimeSpan.h
-)
-
 # Download date lib at configure time
 include(CMakeLists-datelib.txt)
 
 add_library(${MODULE} INTERFACE)
 
-# if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-#     target_compile_options(${MODULE} PUBLIC ${CLANG_COMPILE_OPTIONS})
-# elseif(CMAKE_COMPILER_IS_GNUCXX)
-#     target_compile_options(${MODULE} PUBLIC ${GCC_COMPILE_OPTIONS})
-# else()
-#     message(${CMAKE_COMPILER_ID} "compiler might not be supported yet.")
-# endif()
+target_sources(${MODULE}
+    INTERFACE
+        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/DateTime.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/IsoDate.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/TimeSpan.h"
+)
 
 target_include_directories(${MODULE}
     INTERFACE include
