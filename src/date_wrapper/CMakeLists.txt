@@ -20,9 +20,3 @@ target_include_directories(${MODULE}
 )
 
 target_compile_features(${MODULE} INTERFACE cxx_std_17)
-
-if (WIN32)
-    install(TARGETS ${MODULE} RUNTIME DESTINATION ${EXECUTABLE_INSTALL_PATH_SUFFIX})
-else()
-    install(TARGETS ${MODULE} LIBRARY DESTINATION ${LIBRARY_INSTALL_PATH_SUFFIX})
-endif()

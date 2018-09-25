@@ -7,7 +7,8 @@ find_package(Threads REQUIRED)
 include(CMakeLists-gtest.txt)
 
 target_include_directories(gmock_main SYSTEM BEFORE INTERFACE
-    "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
+    "$<BUILD_INTERFACE:${gtest_SOURCE_DIR}/include>"
+    "$<BUILD_INTERFACE:${gmock_SOURCE_DIR}/include>")
 
 add_subdirectory(date_wrapper_tests)
 
