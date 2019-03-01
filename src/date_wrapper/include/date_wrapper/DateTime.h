@@ -22,9 +22,10 @@
 #ifndef DATETIME_H_RTJVB37W
 #define DATETIME_H_RTJVB37W
 
-#include <date/date.h>
+#include "date_wrapper/Date.h"
 #include <algorithm>
 #include <array>
+#include <date/date.h>
 #include <iomanip>
 #include <sstream>
 
@@ -40,16 +41,6 @@ public:
     using Months = date::months;
     using Years = date::years;
     using precision = std::chrono::system_clock::duration;
-
-    enum class Weekday {
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday
-    };
 
     constexpr DateTime(
         std::chrono::system_clock::time_point timepoint) noexcept;
@@ -73,9 +64,11 @@ public:
     constexpr static DateTime
     fromTimestamp(long long timestamp, int offsetFromUtcInSeconds = 0) noexcept;
 
+    [[deprecated]]
     static DateTime currentDateTime() noexcept;
 
     /* Not thread-safe */
+    [[deprecated]]
     static DateTime currentDateTimeLocal() noexcept;
 
     /* Return std::time_t representation. */
@@ -97,7 +90,8 @@ public:
      * Result is rounded towards zero.
      */
     template <typename Duration = std::chrono::system_clock::duration>
-    constexpr Duration differenceBetween(const DateTime& other) const noexcept;
+    [[deprecated]] constexpr Duration
+    differenceBetween(const DateTime& other) const noexcept;
 
     /* Return distance in calendar days to other DateTime object.
      *
@@ -106,21 +100,24 @@ public:
      * Number of days returned is a number of times midnight is encountered
      * between two DateTime objects. So distance between 11.04.2016 23:59 and
      * 12.04.2016 00:01 is equal to one day. */
-    constexpr int discreteDaysTo(const DateTime& other) const noexcept;
+    [[deprecated]] constexpr int discreteDaysTo(const DateTime& other) const
+        noexcept;
 
     /* Return distance in calendar months to other DateTime object.
      *
      * If other DateTime object is behind in time, result will be negative. */
-    constexpr int discreteMonthsTo(const DateTime& other) const noexcept;
+    [[deprecated]] constexpr int discreteMonthsTo(const DateTime& other) const
+        noexcept;
 
     template <class Duration>
-    constexpr long long discreteDistanceTo(const DateTime& other) const
-        noexcept;
+    [[deprecated]] constexpr long long
+    discreteDistanceTo(const DateTime& other) const noexcept;
 
     /* Return distance in calendar years to other DateTime object.
      *
      * If other DateTime object is behind in time, result will be negative. */
-    constexpr int discreteYearsTo(const DateTime& other) const noexcept;
+    [[deprecated]] constexpr int discreteYearsTo(const DateTime& other) const
+        noexcept;
 
     /* Return chrono time_point. */
     constexpr std::chrono::system_clock::time_point chronoTimepoint() const
@@ -209,7 +206,14 @@ private:
     date::time_of_day<std::chrono::system_clock::duration> tod;
 };
 
+DateTime current_date_time() noexcept;
+
+/* Not thread-safe */
+DateTime current_date_time_local() noexcept;
+
 namespace utils {
+
+    using namespace ::utils;
 
     constexpr std::array<unsigned, 7> mondayFirstTable{
         {6u, 0u, 1u, 2u, 3u, 4u, 5u}};
@@ -229,7 +233,8 @@ namespace utils {
             + seconds(t.tm_sec);
     }
 
-    constexpr date::year_month_day normalize(date::year_month_day ymd) noexcept;
+    // constexpr date::year_month_day normalize(date::year_month_day ymd)
+    // noexcept;
 
     template <typename T>
     struct is_chrono_duration {
@@ -240,27 +245,6 @@ namespace utils {
     struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
         static constexpr bool value = true;
     };
-
-    inline constexpr date::year_month_day
-    normalize(date::year_month_day ymd) noexcept
-    {
-        using namespace date;
-        if (!ymd.ok())
-            return ymd.year() / ymd.month() / last;
-        return ymd;
-    }
-
-    inline bool startsWith(std::string_view str, std::string_view prefix)
-    {
-        if (prefix.size() > str.size())
-            return false;
-        return std::equal(prefix.cbegin(), prefix.cend(), str.cbegin());
-    }
-
-    inline bool startsWith(std::string_view str, char ch)
-    {
-        return !str.empty() && str[0] == ch;
-    }
 
     inline std::string formatDateTime(const DateTime& dt,
                                       std::string_view format)
@@ -418,7 +402,7 @@ constexpr DateTime DateTime::add(DateTime::Months duration) const noexcept
     auto y = year_month{date::year(year()), date::month(month())}
         + date::months{duration.count()};
     auto t = year_month_day{y.year(), y.month(), date::day(day())};
-    t = utils::normalize(t);
+    t = ::utils::normalize(t);
     auto d
         = sys_days{t} + hours{hour()} + minutes{minute()} + seconds{second()};
 
@@ -513,11 +497,11 @@ constexpr long long DateTime::second() const noexcept
     return tod.seconds().count();
 }
 
-constexpr DateTime::Weekday DateTime::dayOfWeek() const noexcept
+constexpr Weekday DateTime::dayOfWeek() const noexcept
 {
     auto dayNumber
         = utils::mondayFirstTable[static_cast<unsigned>(date::weekday(ymd))];
-    return static_cast<DateTime::Weekday>(dayNumber);
+    return static_cast<Weekday>(dayNumber);
 }
 
 inline std::string DateTime::toString(std::string format) const
@@ -525,7 +509,24 @@ inline std::string DateTime::toString(std::string format) const
     return utils::formatDateTime(*this, std::move(format));
 }
 
-inline std::ostream& operator<<(std::ostream& os, const DateTime& dt)
+inline DateTime current_date_time() noexcept
+{
+    return DateTime{std::chrono::system_clock::now()};
+}
+
+inline DateTime current_date_time_local() noexcept
+{
+    auto timepoint = std::chrono::system_clock::now();
+    std::time_t t = std::chrono::system_clock::to_time_t(timepoint);
+    std::tm localTime = *std::localtime(&t);
+    utils::to_time_point(localTime, timepoint);
+    return DateTime{timepoint};
+}
+
+template<class CharT, class Traits>
+inline
+std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& os, const DateTime& dt)
 {
     os << std::setfill('0') << std::setw(2) << dt.day() << "."
        << std::setfill('0') << std::setw(2) << dt.month() << "." << dt.year()

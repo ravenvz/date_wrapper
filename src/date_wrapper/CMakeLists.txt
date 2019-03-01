@@ -9,9 +9,7 @@ add_library(${MODULE} INTERFACE)
 
 target_sources(${MODULE}
     INTERFACE
-        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/DateTime.h"
-        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/IsoDate.h"
-        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/TimeSpan.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/date_wrapper/date_wrapper.h"
 )
 
 target_include_directories(${MODULE}

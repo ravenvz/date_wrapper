@@ -1,6 +1,6 @@
 /********************************************************************************
 **
-** Copyright (C) 2016, 2017 Pavel Pavlov.
+** Copyright (C) 2016 - 2019 Pavel Pavlov.
 **
 **
 ** This file is part of DateWrapper.
@@ -19,10 +19,8 @@
 ** along with DateWrapper.  If not, see <http://www.gnu.org/licenses/>.
 **
 *********************************************************************************/
-#include "date_wrapper/TimeSpan.h"
-#include "date_wrapper/IsoDate.h"
 #include "gtest/gtest.h"
-#include <iostream>
+#include <date_wrapper/date_wrapper.h>
 
 using namespace dw;
 using namespace dw::utils;
@@ -69,9 +67,6 @@ TEST(DateTime, test_add_days_backward_2)
     EXPECT_EQ(2016, thirtyDaysBack.year());
     EXPECT_EQ(4, thirtyDaysBack.month());
     EXPECT_EQ(16, thirtyDaysBack.day());
-    EXPECT_EQ(2016, dt.year());
-    EXPECT_EQ(5, dt.month());
-    EXPECT_EQ(16, dt.day());
 }
 
 TEST(DateTime, test_add_months_backward_2)
@@ -208,20 +203,14 @@ TEST(DateTime, test_add_hours_backward)
 
 TEST(DateTime, test_returns_correct_weekday)
 {
-    EXPECT_TRUE(DateTime::Weekday::Monday
-                == DateTime::fromYMD(2016, 4, 4).dayOfWeek());
-    EXPECT_TRUE(DateTime::Weekday::Tuesday
-                == DateTime::fromYMD(2016, 4, 5).dayOfWeek());
-    EXPECT_TRUE(DateTime::Weekday::Wednesday
+    EXPECT_TRUE(Weekday::Monday == DateTime::fromYMD(2016, 4, 4).dayOfWeek());
+    EXPECT_TRUE(Weekday::Tuesday == DateTime::fromYMD(2016, 4, 5).dayOfWeek());
+    EXPECT_TRUE(Weekday::Wednesday
                 == DateTime::fromYMD(2016, 4, 6).dayOfWeek());
-    EXPECT_TRUE(DateTime::Weekday::Thursday
-                == DateTime::fromYMD(2016, 4, 7).dayOfWeek());
-    EXPECT_TRUE(DateTime::Weekday::Friday
-                == DateTime::fromYMD(2016, 4, 8).dayOfWeek());
-    EXPECT_TRUE(DateTime::Weekday::Saturday
-                == DateTime::fromYMD(2016, 4, 9).dayOfWeek());
-    EXPECT_TRUE(DateTime::Weekday::Sunday
-                == DateTime::fromYMD(2016, 4, 10).dayOfWeek());
+    EXPECT_TRUE(Weekday::Thursday == DateTime::fromYMD(2016, 4, 7).dayOfWeek());
+    EXPECT_TRUE(Weekday::Friday == DateTime::fromYMD(2016, 4, 8).dayOfWeek());
+    EXPECT_TRUE(Weekday::Saturday == DateTime::fromYMD(2016, 4, 9).dayOfWeek());
+    EXPECT_TRUE(Weekday::Sunday == DateTime::fromYMD(2016, 4, 10).dayOfWeek());
 }
 
 TEST(DateTime, test_ostream_operator)

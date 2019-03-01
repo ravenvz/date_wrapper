@@ -1,6 +1,6 @@
 /********************************************************************************
 **
-** Copyright (C) 2016, 2017 Pavel Pavlov.
+** Copyright (C) 2016 - 2019 Pavel Pavlov.
 **
 **
 ** This file is part of DateWrapper.
@@ -19,8 +19,8 @@
 ** along with DateWrapper.  If not, see <http://www.gnu.org/licenses/>.
 **
 *********************************************************************************/
-#include "date_wrapper/TimeSpan.h"
 #include "gtest/gtest.h"
+#include <date_wrapper/date_wrapper.h>
 
 using namespace dw;
 
