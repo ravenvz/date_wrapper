@@ -24,207 +24,219 @@
 
 using namespace dw;
 using namespace dw::utils;
+using namespace std::chrono_literals;
+using namespace std::chrono;
 
-TEST(DateTime, test_constructs_correct_object_from_YMD)
+TEST(DateTime, construct_from_unix_timestamp)
 {
-    DateTime dt = DateTime::fromYMD(2016, 4, 12);
-    EXPECT_EQ(2016, dt.year());
-    EXPECT_EQ(4, dt.month());
-    EXPECT_EQ(12, dt.day());
-    EXPECT_EQ(0, dt.hour());
-    EXPECT_EQ(0, dt.minute());
-    EXPECT_EQ(0, dt.second());
+    constexpr DateTime expected{DateTime{Date{Year{2017}, Month{5}, Day{1}}}
+                                + 13h + 10min + 20s};
+    constexpr DateTime dt{std::chrono::system_clock::time_point{1493644220s}};
+
+    static_assert(expected == dt);
 }
 
-TEST(DateTime, test_throws_runtime_error_if_invalid_date)
+TEST(DateTime, construct_from_timestamp)
 {
-    EXPECT_THROW(DateTime::fromYMD(2016, 77, 12), std::runtime_error);
+    constexpr DateTime expected{DateTime{Date{Year{2017}, Month{5}, Day{1}}}
+                                + 13h + 10min + 20s};
+
+    constexpr DateTime dt{
+        std::chrono::system_clock::time_point{1493644220000ms}};
+
+    static_assert(expected == dt);
 }
 
-TEST(DateTime, test_add_days_forward)
+TEST(DateTime, constructs_from_timestamp_with_low_precision)
 {
-    DateTime dt = DateTime::fromYMD(2016, 2, 20).add(DateTime::Days{9});
+    constexpr DateTime expected{DateTime{Date{Year{2017}, Month{5}, Day{1}}}};
 
-    EXPECT_EQ(2016, dt.year());
-    EXPECT_EQ(2, dt.month());
-    EXPECT_EQ(29, dt.day());
+    constexpr DateTime dt{std::chrono::system_clock::time_point{414888h}};
+
+    static_assert(expected == dt);
 }
 
-TEST(DateTime, test_add_days_backward)
+TEST(DateTime, constructs_from_date)
 {
-    DateTime dt = DateTime::fromYMD(2016, 2, 20).add(DateTime::Days{-10});
+    constexpr Date date{Year{2016}, Month{4}, Day{12}};
 
-    EXPECT_EQ(2016, dt.year());
-    EXPECT_EQ(2, dt.month());
-    EXPECT_EQ(10, dt.day());
+    constexpr DateTime dt{date};
+
+    static_assert(Year{2016} == dt.year());
+    static_assert(Month{4} == dt.month());
+    static_assert(Day{12} == dt.day());
+    static_assert(0h == dt.hour());
+    static_assert(0min == dt.minute());
+    static_assert(0s == dt.second());
 }
 
-TEST(DateTime, test_add_days_backward_2)
+TEST(DateTime, normalizes_time_since_midnight_when_contructing)
 {
-    DateTime dt = DateTime::fromYMD(2016, 5, 16);
-    DateTime thirtyDaysBack = dt.add(DateTime::Days{-30});
+    constexpr auto dt = DateTime{Date{Year{2019}, Month{3}, Day{20}}, 26h};
+    constexpr auto expected
+        = DateTime{Date{Year{2019}, Month{3}, Day{21}}} + 2h;
 
-    EXPECT_EQ(2016, thirtyDaysBack.year());
-    EXPECT_EQ(4, thirtyDaysBack.month());
-    EXPECT_EQ(16, thirtyDaysBack.day());
+    static_assert(expected == dt);
 }
 
-TEST(DateTime, test_add_months_backward_2)
+TEST(DateTime, adds_days)
 {
-    DateTime dt = DateTime::fromYMD(2017, 3, 1);
-    DateTime elevenMonthsBack = dt.add(DateTime::Months{-11});
+    constexpr DateTime dt{Date{Year{2016}, Month{2}, Day{20}}};
+    constexpr DateTime expected{Date{Year{2016}, Month{2}, Day{29}}};
 
-    EXPECT_EQ(2016, elevenMonthsBack.year());
-    EXPECT_EQ(4, elevenMonthsBack.month());
-    EXPECT_EQ(1, elevenMonthsBack.day());
+    constexpr DateTime modified{dt + Days{9}};
+
+    static_assert(expected == modified);
 }
 
-TEST(DateTime, test_add_years_forward)
+TEST(DateTime, subtracts_days)
 {
-    DateTime dt = DateTime::fromYMD(2016, 5, 17);
-    DateTime yearForward = dt.add(DateTime::Years{14});
+    constexpr DateTime dt{Date{Year{2016}, Month{5}, Day{16}}};
+    constexpr DateTime expected{Date{Year{2016}, Month{4}, Day{16}}};
 
-    EXPECT_EQ(2030, yearForward.year());
-    EXPECT_EQ(5, yearForward.month());
-    EXPECT_EQ(17, yearForward.day());
+    constexpr DateTime modified{dt - Days{30}};
+
+    static_assert(expected == modified);
 }
 
-TEST(DateTime, test_add_years_backward)
+TEST(DateTime, adds_months)
 {
-    DateTime dt = DateTime::fromYMD(2016, 5, 17);
-    DateTime yearBackward = dt.add(DateTime::Years{-16});
+    constexpr DateTime dt{Date{Year{2019}, Month{3}, Day{1}}};
+    constexpr auto expected
+        = utils::from_ymd(date::year{2019} / date::March / 1 + date::months{1});
 
-    EXPECT_EQ(2000, yearBackward.year());
-    EXPECT_EQ(5, yearBackward.month());
-    EXPECT_EQ(17, yearBackward.day());
+    constexpr DateTime modified{dt + Months{1}};
+
+    static_assert(expected == modified);
 }
 
-TEST(DateTime, test_add_minutes_forward)
+TEST(DateTime, subtracting_custom_duration)
 {
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2016, 11, 26);
-    DateTime minutesForward = dt.add(25min);
+    constexpr auto dt
+        = DateTime{Date{Year{2019}, Month{3}, Day{12}}} + 20h + 20min + 20s;
+    constexpr auto expected
+        = DateTime{Date{Year{2019}, Month{3}, Day{11}}} + 22h + 10min + 15s;
 
-    EXPECT_EQ(2016, minutesForward.year());
-    EXPECT_EQ(11, minutesForward.month());
-    EXPECT_EQ(26, minutesForward.day());
-    EXPECT_EQ(25, minutesForward.minute());
+    constexpr DateTime modified{dt - 22h - 10min - 5s};
+
+    static_assert(expected == modified);
 }
 
-TEST(DateTime, test_add_minutes_backward)
+TEST(DateTime, subtracting_calendric_months_results_in_latest_valid_date)
 {
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2016, 11, 26);
-    DateTime minutesBackward = dt.add(-25min);
+    constexpr auto dt
+        = DateTime{Date{Year{2017}, Month{3}, Day{1}}} + 23h + 11min + 4s;
+    constexpr auto expected
+        = DateTime{Date{Year{2016}, Month{4}, Day{1}}} + 23h + 11min + 4s;
 
-    EXPECT_EQ(2016, minutesBackward.year());
-    EXPECT_EQ(11, minutesBackward.month());
-    EXPECT_EQ(25, minutesBackward.day());
-    EXPECT_EQ(35, minutesBackward.minute());
+    constexpr DateTime modified{dt - Months{11}};
+
+    static_assert(expected == modified);
 }
 
-TEST(DateTime, test_add_hours_forward)
+TEST(DateTime, adds_years)
 {
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2016, 11, 26);
-    DateTime hoursForward = dt.add(25h);
+    constexpr auto dt
+        = DateTime{Date{Year{2016}, Month{2}, Day{29}}} + 17h + 25min + 30s;
+    constexpr auto expected
+        = DateTime{Date{Year{5031}, Month{2}, Day{28}}} + 17h + 25min + 30s;
 
-    EXPECT_EQ(2016, hoursForward.year());
-    EXPECT_EQ(11, hoursForward.month());
-    EXPECT_EQ(27, hoursForward.day());
-    EXPECT_EQ(1, hoursForward.hour());
+    constexpr DateTime modified{dt + Years{3015}};
+
+    EXPECT_EQ(expected, modified);
+    // static_assert(expected == modified);
 }
 
-TEST(DateTime, test_difference_between)
+TEST(DateTime, subtracts_years)
 {
-    using namespace std::chrono_literals;
-    using namespace std::chrono;
-    using namespace date;
-    DateTime dt = DateTime::fromYMD(2017, 5, 1);
-    DateTime other = dt.add(-25min);
+    constexpr auto dt
+        = DateTime{Date{Year{2030}, Month{2}, Day{28}}} + 10h + 20min + 11s;
+    constexpr auto expected
+        = DateTime{Date{Year{2016}, Month{2}, Day{28}}} + 10h + 20min + 11s;
 
-    EXPECT_EQ(1500, other.differenceBetween<seconds>(dt).count());
-    EXPECT_EQ(-1500, dt.differenceBetween<seconds>(other).count());
-    EXPECT_EQ(25, other.differenceBetween<minutes>(dt).count());
-    EXPECT_EQ(-25, dt.differenceBetween<minutes>(other).count());
-    // rounding towards zero
-    EXPECT_EQ(0, other.differenceBetween<hours>(dt).count());
-    EXPECT_EQ(0, dt.differenceBetween<hours>(other).count());
-    EXPECT_EQ(0, other.differenceBetween<DateTime::Days>(dt).count());
-    EXPECT_EQ(0, dt.differenceBetween<DateTime::Days>(other).count());
-    EXPECT_EQ(0, other.differenceBetween<DateTime::Months>(dt).count());
-    EXPECT_EQ(0, dt.differenceBetween<DateTime::Months>(other).count());
+    constexpr DateTime modified{dt - Years{14}};
+
+    static_assert(expected == modified);
 }
 
-TEST(DateTime, test_discrete_days_to)
+TEST(DateTime, adds_minutes)
 {
-    using namespace std::chrono;
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2017, 5, 10);
+    constexpr DateTime dt{Date{Year{2016}, Month{11}, Day{26}}};
 
-    EXPECT_EQ(0, dt.discreteDaysTo(dt.add(1h)));
-    EXPECT_EQ(-1, dt.discreteDaysTo(dt.add(-1h)));
-    EXPECT_EQ(1, dt.discreteDaysTo(dt.add(24h)));
+    constexpr auto modified = dt + 5min;
+
+    static_assert(Year{2016} == modified.year());
+    static_assert(Month{11} == modified.month());
+    static_assert(Day{26} == modified.day());
+    static_assert(0h == modified.hour());
+    static_assert(5min == modified.minute());
+    static_assert(0s == modified.second());
 }
 
-TEST(DateTime, test_discrete_months_to)
+TEST(DateTime, subtracts_minutes)
 {
-    using namespace std::chrono;
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2017, 5, 10);
+    constexpr DateTime dt{Date{Year{2016}, Month{11}, Day{26}}};
 
-    EXPECT_EQ(0, dt.discreteMonthsTo(dt));
-    EXPECT_EQ(1, dt.discreteMonthsTo(dt.add(DateTime::Days{31})));
-    EXPECT_EQ(-1, dt.discreteMonthsTo(dt.add(DateTime::Days{-31})));
+    constexpr auto modified = dt - 25min;
+
+    static_assert(Year{2016} == modified.year());
+    static_assert(Month{11} == modified.month());
+    static_assert(Day{25} == modified.day());
+    static_assert(23h == modified.hour());
+    static_assert(35min == modified.minute());
+    static_assert(0s == modified.second());
 }
 
-TEST(DateTime, test_discrete_years_to)
+TEST(DateTime, adds_hours)
 {
-    using namespace std::chrono;
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2017, 5, 10);
+    constexpr DateTime dt{Date{Year{2016}, Month{11}, Day{26}}};
 
-    EXPECT_EQ(0, dt.discreteYearsTo(dt));
-    EXPECT_EQ(1, dt.discreteYearsTo(dt.add(DateTime::Months{12})));
-    EXPECT_EQ(-1, dt.discreteYearsTo(dt.add(DateTime::Months{-12})));
+    constexpr auto modified = dt + 25h;
+
+    static_assert(Year{2016} == modified.year());
+    static_assert(Month{11} == modified.month());
+    static_assert(Day{27} == modified.day());
+    static_assert(1h == modified.hour());
+    static_assert(0min == modified.minute());
+    static_assert(0s == modified.second());
 }
 
-TEST(DateTime, test_add_hours_backward)
+TEST(DateTime, subtracts_hours)
 {
-    using namespace std::chrono_literals;
-    DateTime dt = DateTime::fromYMD(2016, 11, 26);
-    DateTime hoursBackward = dt.add(-25h);
+    constexpr DateTime dt{Date{Year{2016}, Month{11}, Day{26}}};
 
-    EXPECT_EQ(2016, hoursBackward.year());
-    EXPECT_EQ(11, hoursBackward.month());
-    EXPECT_EQ(24, hoursBackward.day());
-    EXPECT_EQ(23, hoursBackward.hour());
+    constexpr DateTime modified = dt - 25h;
+
+    static_assert(Year{2016} == modified.year());
+    static_assert(Month{11} == modified.month());
+    static_assert(Day{24} == modified.day());
+    static_assert(23h == modified.hour());
+    static_assert(0min == modified.minute());
+    static_assert(0s == modified.second());
 }
 
-TEST(DateTime, test_returns_correct_weekday)
+TEST(DateTime, returns_correct_weekday)
 {
-    EXPECT_TRUE(Weekday::Monday == DateTime::fromYMD(2016, 4, 4).dayOfWeek());
-    EXPECT_TRUE(Weekday::Tuesday == DateTime::fromYMD(2016, 4, 5).dayOfWeek());
-    EXPECT_TRUE(Weekday::Wednesday
-                == DateTime::fromYMD(2016, 4, 6).dayOfWeek());
-    EXPECT_TRUE(Weekday::Thursday == DateTime::fromYMD(2016, 4, 7).dayOfWeek());
-    EXPECT_TRUE(Weekday::Friday == DateTime::fromYMD(2016, 4, 8).dayOfWeek());
-    EXPECT_TRUE(Weekday::Saturday == DateTime::fromYMD(2016, 4, 9).dayOfWeek());
-    EXPECT_TRUE(Weekday::Sunday == DateTime::fromYMD(2016, 4, 10).dayOfWeek());
+    static_assert(Weekday::Monday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{4}}}.weekday());
+    static_assert(Weekday::Tuesday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{5}}}.weekday());
+    static_assert(Weekday::Wednesday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{6}}}.weekday());
+    static_assert(Weekday::Thursday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{7}}}.weekday());
+    static_assert(Weekday::Friday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{8}}}.weekday());
+    static_assert(Weekday::Saturday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{9}}}.weekday());
+    static_assert(Weekday::Sunday
+                  == DateTime{Date{Year{2016}, Month{4}, Day{10}}}.weekday());
 }
 
-TEST(DateTime, test_ostream_operator)
+TEST(DateTime, ostream_operator)
 {
-    std::tm tm_struct;
-    tm_struct.tm_year = 116;
-    tm_struct.tm_mon = 8;
-    tm_struct.tm_mday = 21;
-    tm_struct.tm_hour = 12;
-    tm_struct.tm_min = 59;
-    tm_struct.tm_sec = 19;
-    std::chrono::system_clock::time_point timepoint;
-    to_time_point(tm_struct, timepoint);
-    DateTime dt{timepoint};
+    constexpr auto dt
+        = DateTime{Date{Year{2016}, Month{9}, Day{21}}} + 12h + 59min + 19s;
     std::string expected{"21.09.2016 12:59:19"};
     std::stringstream os;
 
@@ -233,139 +245,88 @@ TEST(DateTime, test_ostream_operator)
     EXPECT_EQ(expected, os.str());
 }
 
-TEST(DateTime, test_to_string_handles_date_format)
+TEST(DateTime, to_string_handles_date_format)
 {
-    DateTime dt = DateTime::fromYMD(2016, 9, 21);
+    constexpr DateTime dt{Date{Year{2016}, Month{9}, Day{21}}};
 
-    EXPECT_EQ("2016.09.21", dt.toString("yyyy.MM.dd"));
-    EXPECT_EQ("201616", dt.toString("yyyyyy"));
-    EXPECT_EQ("21", dt.toString("d"));
-    EXPECT_EQ("2121", dt.toString("ddd"));
-    EXPECT_EQ("9", dt.toString("M"));
-    EXPECT_EQ("099", dt.toString("MMM"));
+    EXPECT_EQ("2016.09.21", to_string(dt, "yyyy.MM.dd"));
+    EXPECT_EQ("201616", to_string(dt, "yyyyyy"));
+    EXPECT_EQ("21", to_string(dt, "d"));
+    EXPECT_EQ("2121", to_string(dt, "ddd"));
+    EXPECT_EQ("9", to_string(dt, "M"));
+    EXPECT_EQ("099", to_string(dt, "MMM"));
 }
 
-TEST(DateTime, test_to_string_handles_time_format)
+TEST(DateTime, to_string_handles_time_format)
 {
-    std::tm tm_struct;
-    tm_struct.tm_year = 116;
-    tm_struct.tm_mon = 8;
-    tm_struct.tm_mday = 21;
-    tm_struct.tm_hour = 9;
-    tm_struct.tm_min = 7;
-    tm_struct.tm_sec = 5;
-    std::chrono::system_clock::time_point timepoint;
-    to_time_point(tm_struct, timepoint);
-    DateTime dt{timepoint};
+    constexpr auto dt
+        = DateTime{Date{Year{2016}, Month{9}, Day{21}}} + 9h + 7min + 5s;
 
-    EXPECT_EQ("09", dt.toString("hh"));
-    EXPECT_EQ("9", dt.toString("h"));
-    EXPECT_EQ("07", dt.toString("mm"));
-    EXPECT_EQ("077", dt.toString("mmm"));
-    EXPECT_EQ("077", dt.toString("mmm"));
-    EXPECT_EQ("05", dt.toString("ss"));
-    EXPECT_EQ("055", dt.toString("sss"));
-    EXPECT_EQ("0907", dt.toString("hhmm"));
+    EXPECT_EQ("09", to_string(dt, "hh"));
+    EXPECT_EQ("9", to_string(dt, "h"));
+    EXPECT_EQ("07", to_string(dt, "mm"));
+    EXPECT_EQ("077", to_string(dt, "mmm"));
+    EXPECT_EQ("077", to_string(dt, "mmm"));
+    EXPECT_EQ("05", to_string(dt, "ss"));
+    EXPECT_EQ("055", to_string(dt, "sss"));
+    EXPECT_EQ("0907", to_string(dt, "hhmm"));
 }
 
-TEST(DateTime, test_ignores_single_quote_that_has_no_pair)
+TEST(DateTime, ignores_single_quote_that_has_no_pair)
 {
-    DateTime dt = DateTime::fromYMD(2016, 9, 21);
+    constexpr DateTime dt{Date{Year{2016}, Month{9}, Day{21}}};
 
-    EXPECT_EQ("21-09-2016", dt.toString("dd-'MM-yyyy"));
+    EXPECT_EQ("21-09-2016", to_string(dt, "dd-'MM-yyyy"));
 }
 
-TEST(DateTime, test_threats_input_in_single_quotes_as_text)
+TEST(DateTime, threats_input_in_single_quotes_as_text)
 {
-    DateTime dt = DateTime::fromYMD(2016, 9, 21);
+    constexpr DateTime dt{Date{Year{2016}, Month{9}, Day{21}}};
 
-    EXPECT_EQ("2016|what|09ahhMM21", dt.toString("yyyy|'what'|MM'ahhMM'dd"));
+    EXPECT_EQ("2016|what|09ahhMM21", to_string(dt, "yyyy|'what'|MM'ahhMM'dd"));
 }
 
-TEST(DateTime, test_double_single_quotes_replaced_by_single_quote_in_output)
+TEST(DateTime, double_single_quotes_replaced_by_single_quote_in_output)
 {
-    DateTime dt = DateTime::fromYMD(2016, 9, 21);
+    constexpr DateTime dt{Date{Year{2016}, Month{9}, Day{21}}};
 
-    EXPECT_EQ("2016'09'21", dt.toString("yyyy''MM''dd"));
+    EXPECT_EQ("2016'09'21", to_string(dt, "yyyy''MM''dd"));
 }
 
 TEST(DateTime, test_comparison_operators)
 {
-    DateTime dt = DateTime::fromYMD(2016, 11, 29);
-    DateTime before = DateTime::fromYMD(2016, 11, 28);
-    DateTime after = DateTime::fromYMD(2016, 11, 30);
+    constexpr auto dt = DateTime{Date{Year{8032}, Month{11}, Day{29}}};
+    constexpr auto before = DateTime{Date{Year{8032}, Month{11}, Day{28}}};
+    constexpr auto after = DateTime{Date{Year{8032}, Month{11}, Day{30}}};
 
-    EXPECT_TRUE(dt == dt);
-    EXPECT_TRUE(dt <= dt);
-    EXPECT_TRUE(dt >= dt);
-    EXPECT_TRUE(before <= dt);
-    EXPECT_TRUE(before < dt);
-    EXPECT_TRUE(after >= dt);
-    EXPECT_TRUE(after > dt);
+    static_assert(dt == dt);
+    static_assert(dt <= dt);
+    static_assert(dt >= dt);
+    static_assert(before <= dt);
+    static_assert(before < dt);
+    static_assert(after >= dt);
+    static_assert(after > dt);
+    static_assert(dt < dt + 1s);
+    static_assert(dt + 1s > dt);
 }
 
-TEST(DateTime, test_construct_from_unix_timestamp)
+TEST(DateTime, returns_unix_timestamp)
 {
-    DateTime dt = DateTime::fromUnixTimestamp(1493644220);
+    constexpr auto dt
+        = DateTime{Date{Year{2017}, Month{5}, Day{1}}} + 13h + 10min + 20s;
 
-    EXPECT_EQ(2017, dt.year());
-    EXPECT_EQ(5, dt.month());
-    EXPECT_EQ(1, dt.day());
-    EXPECT_EQ(13, dt.hour());
-    EXPECT_EQ(10, dt.minute());
-    EXPECT_EQ(20, dt.second());
+    static_assert(
+        1493644220s
+        == to_time_point<std::chrono::seconds>(dt).time_since_epoch());
 }
 
-TEST(DateTime, test_construct_from_timestamp_with_given_precision)
+TEST(DateTime, returns_timestamp_in_years)
 {
-    DateTime dt
-        = DateTime::fromTimestamp<std::chrono::milliseconds>(1493644220000);
+    constexpr auto dt = DateTime{Date{Year{5070}, Month{4}, Day{1}}};
 
-    EXPECT_EQ(2017, dt.year());
-    EXPECT_EQ(5, dt.month());
-    EXPECT_EQ(1, dt.day());
-    EXPECT_EQ(13, dt.hour());
-    EXPECT_EQ(10, dt.minute());
-    EXPECT_EQ(20, dt.second());
-}
-
-TEST(DateTime, test_constructs_from_timestamp_of_very_low_precision)
-{
-    DateTime dt = DateTime::fromTimestamp<std::chrono::hours>(414888);
-
-    EXPECT_EQ(2017, dt.year());
-    EXPECT_EQ(5, dt.month());
-    EXPECT_EQ(1, dt.day());
-    EXPECT_EQ(0, dt.hour());
-    EXPECT_EQ(0, dt.minute());
-    EXPECT_EQ(0, dt.second());
-}
-
-TEST(None, test_construct_from_timestamp_with_utc_offset)
-{
-    DateTime dt = DateTime::fromTimestamp<std::chrono::hours>(414888, 10800);
-
-    EXPECT_EQ(2017, dt.year());
-    EXPECT_EQ(5, dt.month());
-    EXPECT_EQ(1, dt.day());
-    EXPECT_EQ(3, dt.hour());
-    EXPECT_EQ(0, dt.minute());
-    EXPECT_EQ(0, dt.second());
-}
-
-TEST(DateTime, test_returns_unix_timestamp)
-{
-    std::tm tm_struct;
-    tm_struct.tm_year = 117;
-    tm_struct.tm_mon = 4;
-    tm_struct.tm_mday = 1;
-    tm_struct.tm_hour = 13;
-    tm_struct.tm_min = 10;
-    tm_struct.tm_sec = 20;
-    std::chrono::system_clock::time_point timepoint;
-    to_time_point(tm_struct, timepoint);
-    DateTime dt{timepoint};
-
-    EXPECT_EQ(1493644220, dt.unix_timestamp());
+    static_assert(Years{3100} == to_time_point<Years>(dt).time_since_epoch());
+    static_assert(
+        97834348800s
+        == to_time_point<std::chrono::seconds>(dt).time_since_epoch());
 }
 

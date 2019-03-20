@@ -28,9 +28,9 @@ TEST(Date, constructs_from_YMD)
 {
     constexpr Date date{Year{2019}, Month{2}, Day{23}};
 
-    static_assert(2019 == date.year().value());
-    static_assert(2 == date.month().value());
-    static_assert(23 == date.day().value());
+    static_assert(Year{2019} == date.year());
+    static_assert(Month{2} == date.month());
+    static_assert(Day{23} == date.day());
 }
 
 TEST(Date, handles_valid_and_invalid_dates)
@@ -44,10 +44,10 @@ TEST(Date, handles_valid_and_invalid_dates)
 
 TEST(Date, adds_days)
 {
-    constexpr Date date{Year{2016}, Month{2}, Day{20}};
-    constexpr Date expected{Year{2016}, Month{2}, Day{29}};
+    constexpr Date date{Year{2016}, Month{1}, Day{31}};
+    constexpr Date expected{Year{2016}, Month{3}, Day{1}};
 
-    constexpr Date modified{date + Days{9}};
+    constexpr Date modified{date + Days{30}};
 
     static_assert(expected == modified);
 }
@@ -62,7 +62,7 @@ TEST(Date, adds_many_days)
     static_assert(expected == modified);
 }
 
-TEST(Date, subtructs_days)
+TEST(Date, subtracts_days)
 {
     constexpr Date date{Year{2016}, Month{2}, Day{29}};
     constexpr Date expected{Year{2016}, Month{2}, Day{20}};
@@ -72,7 +72,7 @@ TEST(Date, subtructs_days)
     static_assert(expected == modified);
 }
 
-TEST(Date, subtructs_many_days)
+TEST(Date, subtracts_many_days)
 {
     constexpr Date date{Year{2017}, Month{9}, Day{5}};
     constexpr Date expected{Year{2016}, Month{2}, Day{20}};
@@ -92,7 +92,7 @@ TEST(Date, adds_weeks)
     static_assert(expected == modified);
 }
 
-TEST(Date, subtructs_weeks)
+TEST(Date, subtracts_weeks)
 {
     constexpr Date date{Year{2019}, Month{1}, Day{18}};
     constexpr Date expected{Year{2018}, Month{12}, Day{28}};
@@ -112,9 +112,7 @@ TEST(Date, adds_months)
     static_assert(expected == modified);
 }
 
-TEST(
-    Date,
-    when_adding_months_sets_day_to_last_day_of_month_when_resulting_date_is_invalid)
+TEST(Date, adding_months_sets_date_to_latest_valid_when_day_field_overflows)
 {
     constexpr Date date{Year{2016}, Month{8}, Day{31}};
     constexpr Date expected{Year{2016}, Month{9}, Day{30}};
@@ -124,7 +122,7 @@ TEST(
     static_assert(expected == modified);
 }
 
-TEST(Date, subtructs_months)
+TEST(Date, subtracts_months)
 {
     constexpr Date date{Year{2017}, Month{7}, Day{20}};
     constexpr Date expected{Year{2016}, Month{2}, Day{20}};
@@ -134,19 +132,7 @@ TEST(Date, subtructs_months)
     static_assert(expected == modified);
 }
 
-TEST(Date, subructing_months_preserves_day_number)
-{
-    constexpr Date date{Year{2016}, Month{9}, Day{30}};
-    constexpr Date expected{Year{2016}, Month{8}, Day{30}};
-
-    constexpr Date modified{date - Months{1}};
-
-    static_assert(expected == modified);
-}
-
-TEST(
-    Date,
-    when_subtructing_months_sets_day_to_last_day_of_month_when_resulting_date_is_invalid)
+TEST(Date, subtract_months_sets_date_to_latest_valid_when_day_field_overflows)
 {
     constexpr Date date{Year{2019}, Month{3}, Day{31}};
     constexpr Date expected{Year{2019}, Month{2}, Day{28}};
@@ -156,20 +142,46 @@ TEST(
     static_assert(expected == modified);
 }
 
+TEST(Date, normalizes_invalid_date)
+{
+    static_assert(Date{Year{2020}, Month{3}, Day{6}}
+                  == normalize(Date{Year{2015}, Month{55}, Day{250}}));
+}
+
 TEST(Date, adds_years)
 {
-    constexpr Date date{Year{2016}, Month{2}, Day{29}};
-    constexpr Date expected{Year{2017}, Month{2}, Day{28}};
+    constexpr Date date{Year{2016}, Month{3}, Day{10}};
+    constexpr Date expected{Year{12016}, Month{3}, Day{10}};
 
-    constexpr Date modified{date + Years{1}};
+    constexpr Date modified{date + Years{10000}};
 
     static_assert(expected == modified);
 }
 
-TEST(Date, subtructs_years)
+TEST(Date, adding_years_sets_date_to_latest_valid_when_day_field_overflows)
 {
-    constexpr Date date{Year{2017}, Month{2}, Day{28}};
-    constexpr Date expected{Year{2016}, Month{2}, Day{28}};
+    constexpr Date date{Year{2016}, Month{2}, Day{29}};
+    constexpr Date expected_invalid{Year{2017}, Month{2}, Day{28}};
+
+    constexpr Date modified_invalid{date + Years{1}};
+
+    static_assert(expected_invalid == modified_invalid);
+}
+
+TEST(Date, subtracts_years)
+{
+    constexpr Date date{Year{20117}, Month{2}, Day{28}};
+    constexpr Date expected{Year{1956}, Month{2}, Day{28}};
+
+    constexpr Date modified{date - Years{18161}};
+
+    static_assert(expected == modified);
+}
+
+TEST(Date, subtracting_years_sets_date_to_latest_valid_when_day_field_overflows)
+{
+    constexpr Date date{Year{2016}, Month{2}, Day{29}};
+    constexpr Date expected{Year{2015}, Month{2}, Day{28}};
 
     constexpr Date modified{date - Years{1}};
 
@@ -186,13 +198,13 @@ TEST(Date, returns_weekday)
     constexpr Date saturday{Year{2016}, Month{4}, Day{9}};
     constexpr Date sunday{Year{2016}, Month{4}, Day{10}};
 
-    static_assert(Weekday::Monday == monday.weekday());
-    static_assert(Weekday::Tuesday == tuesday.weekday());
-    static_assert(Weekday::Wednesday == wednesday.weekday());
-    static_assert(Weekday::Thursday == thursday.weekday());
-    static_assert(Weekday::Friday == friday.weekday());
-    static_assert(Weekday::Saturday == saturday.weekday());
-    static_assert(Weekday::Sunday == sunday.weekday());
+    static_assert(Weekday::Monday == weekday(monday));
+    static_assert(Weekday::Tuesday == weekday(tuesday));
+    static_assert(Weekday::Wednesday == weekday(wednesday));
+    static_assert(Weekday::Thursday == weekday(thursday));
+    static_assert(Weekday::Friday == weekday(friday));
+    static_assert(Weekday::Saturday == weekday(saturday));
+    static_assert(Weekday::Sunday == weekday(sunday));
 }
 
 TEST(Date, ostream_operator)
@@ -246,9 +258,9 @@ TEST(Date, returns_previous_weekday)
     constexpr Date friday{Year{2019}, Month{3}, Day{1}};
     constexpr Date sunday{Year{2019}, Month{3}, Day{3}};
 
-    static_assert(monday == monday.prev_weekday(Weekday::Monday));
-    static_assert(monday == sunday.prev_weekday(Weekday::Monday));
-    static_assert(friday == sunday.prev_weekday(Weekday::Friday));
+    static_assert(monday == prev_weekday(monday, Weekday::Monday));
+    static_assert(monday == prev_weekday(sunday, Weekday::Monday));
+    static_assert(friday == prev_weekday(sunday, Weekday::Friday));
 }
 
 TEST(Date, returns_next_weekday)
@@ -258,9 +270,9 @@ TEST(Date, returns_next_weekday)
     constexpr Date thursday{Year{2019}, Month{2}, Day{28}};
     constexpr Date sunday{Year{2019}, Month{3}, Day{3}};
 
-    static_assert(sunday == monday.next_weekday(Weekday::Sunday));
-    static_assert(sunday == sunday.next_weekday(Weekday::Sunday));
-    static_assert(thursday == tuesday.next_weekday(Weekday::Thursday));
+    static_assert(sunday == next_weekday(monday, Weekday::Sunday));
+    static_assert(sunday == next_weekday(sunday, Weekday::Sunday));
+    static_assert(thursday == next_weekday(tuesday, Weekday::Thursday));
 }
 
 TEST(Date, returns_previous_weekday_excluding_current)
@@ -270,9 +282,9 @@ TEST(Date, returns_previous_weekday_excluding_current)
     constexpr Date sunday{Year{2019}, Month{3}, Day{3}};
 
     static_assert(prev_sunday
-                  == sunday.prev_weekday_excluding_current(Weekday::Sunday));
+                  == prev_weekday_excluding_current(sunday, Weekday::Sunday));
     static_assert(monday
-                  == sunday.prev_weekday_excluding_current(Weekday::Monday));
+                  == prev_weekday_excluding_current(sunday, Weekday::Monday));
 }
 
 TEST(Date, returns_next_weekday_excluding_current)
@@ -282,9 +294,9 @@ TEST(Date, returns_next_weekday_excluding_current)
     constexpr Date next_monday{Year{2019}, Month{3}, Day{4}};
 
     static_assert(next_monday
-                  == monday.next_weekday_excluding_current(Weekday::Monday));
+                  == next_weekday_excluding_current(monday, Weekday::Monday));
     static_assert(sunday
-                  == monday.next_weekday_excluding_current(Weekday::Sunday));
+                  == next_weekday_excluding_current(monday, Weekday::Sunday));
 }
 
 TEST(Date, returns_last_day_of_month)
@@ -292,8 +304,8 @@ TEST(Date, returns_last_day_of_month)
     constexpr Date firstDay{Year{2019}, Month{2}, Day{1}};
     constexpr Date lastDay{Year{2019}, Month{2}, Day{28}};
 
-    static_assert(lastDay == firstDay.last_day_of_month());
-    static_assert(lastDay == lastDay.last_day_of_month());
+    static_assert(lastDay == last_day_of_month(firstDay));
+    static_assert(lastDay == last_day_of_month(lastDay));
 }
 
 TEST(Date, comparison_operators_different_days)
@@ -341,3 +353,11 @@ TEST(Date, comparison_operators_different_years)
     static_assert(after > date);
 }
 
+TEST(Date, converts_to_sys_days)
+{
+    constexpr Date date{Year{2018}, Month{11}, Day{17}};
+    constexpr date::sys_days expected{
+        date::year_month_day{date::year{2018}, date::month{11}, date::day{17}}};
+
+    static_assert(expected == sys_days(date));
+}

@@ -23,7 +23,7 @@
 #include <date_wrapper/date_wrapper.h>
 
 
-TEST(DateSpanSuite, returns_duration_in_days)
+TEST(DateRangeSuite, returns_duration_in_days)
 {
     using namespace dw;
     using namespace std::chrono;
@@ -31,21 +31,35 @@ TEST(DateSpanSuite, returns_duration_in_days)
     constexpr Date start{Year{2015}, Month{9}, Day{10}};
     constexpr Date finish{Year{2019}, Month{4}, Day{22}};
 
-    constexpr DateSpan ds{start, finish};
+    constexpr DateRange date_range{start, finish};
 
-    static_assert(1320 == ds.duration().count());
-    static_assert(188 == duration_cast<Weeks>(ds.duration()).count());
-    static_assert(43 == duration_cast<Months>(ds.duration()).count());
-    static_assert(3 == duration_cast<Years>(ds.duration()).count());
-    static_assert(4 == ceil<Years>(ds.duration()).count());
+    static_assert(Days{1320} == date_range.duration());
+    static_assert(Weeks{188} == duration_cast<Weeks>(date_range.duration()));
+    static_assert(Months{43} == duration_cast<Months>(date_range.duration()));
+    static_assert(Years{3} == duration_cast<Years>(date_range.duration()));
+    static_assert(Years{4} == ceil<Years>(date_range.duration()));
 }
 
-TEST(DateSpanSuite, date_span_equality)
+TEST(DateRangeSuite, adds_offset_to_range)
+{
+    using namespace dw;
+    using namespace std::chrono_literals;
+    constexpr Date start{Year{2015}, Month{9}, Day{10}};
+    constexpr Date finish{Year{2019}, Month{4}, Day{22}};
+    constexpr DateRange date_range{start, finish};
+
+    constexpr DateRange adjusted{add_offset(date_range, Days{10})};
+
+    static_assert(adjusted.start() == start + Days{10});
+    static_assert(adjusted.finish() == finish + Days{10});
+}
+
+TEST(DateRangeSuite, date_span_equality)
 {
     using namespace dw;
     constexpr Date start{Year{2019}, Month{1}, Day{7}};
     constexpr Date finish{Year{2018}, Month{3}, Day{1}};
 
-    static_assert(DateSpan{start, finish} == DateSpan{start, finish});
-    static_assert(DateSpan{start, start} != DateSpan{start, finish});
+    static_assert(DateRange{start, finish} == DateRange{start, finish});
+    static_assert(DateRange{start, start} != DateRange{start, finish});
 }
