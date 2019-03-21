@@ -30,13 +30,13 @@
 #include <date/iso_week.h>
 #include <iomanip>
 
+namespace dw {
+
 using Days = date::days;
 using Weeks = date::weeks;
 using Months = date::months;
 using Years = date::years;
 using sys_days = date::sys_days;
-
-namespace dw {
 
 enum class Weekday {
     Monday,
