@@ -29,6 +29,7 @@
 #include <date/date.h>
 #include <date/iso_week.h>
 #include <iomanip>
+#include <array>
 
 namespace dw {
 
