@@ -144,8 +144,8 @@ TEST(Date, subtract_months_sets_date_to_latest_valid_when_day_field_overflows)
 
 TEST(Date, normalizes_invalid_date)
 {
-    static_assert(Date{Year{2020}, Month{3}, Day{6}}
-                  == normalize(Date{Year{2015}, Month{55}, Day{250}}));
+    static_assert(Date{Year{2020}, Month{3}, Day{6}} ==
+                  normalize(Date{Year{2015}, Month{55}, Day{250}}));
 }
 
 TEST(Date, adds_years)
@@ -281,10 +281,10 @@ TEST(Date, returns_previous_weekday_excluding_current)
     constexpr Date monday{Year{2019}, Month{2}, Day{25}};
     constexpr Date sunday{Year{2019}, Month{3}, Day{3}};
 
-    static_assert(prev_sunday
-                  == prev_weekday_excluding_current(sunday, Weekday::Sunday));
-    static_assert(monday
-                  == prev_weekday_excluding_current(sunday, Weekday::Monday));
+    static_assert(prev_sunday ==
+                  prev_weekday_excluding_current(sunday, Weekday::Sunday));
+    static_assert(monday ==
+                  prev_weekday_excluding_current(sunday, Weekday::Monday));
 }
 
 TEST(Date, returns_next_weekday_excluding_current)
@@ -293,10 +293,10 @@ TEST(Date, returns_next_weekday_excluding_current)
     constexpr Date sunday{Year{2019}, Month{3}, Day{3}};
     constexpr Date next_monday{Year{2019}, Month{3}, Day{4}};
 
-    static_assert(next_monday
-                  == next_weekday_excluding_current(monday, Weekday::Monday));
-    static_assert(sunday
-                  == next_weekday_excluding_current(monday, Weekday::Sunday));
+    static_assert(next_monday ==
+                  next_weekday_excluding_current(monday, Weekday::Monday));
+    static_assert(sunday ==
+                  next_weekday_excluding_current(monday, Weekday::Sunday));
 }
 
 TEST(Date, returns_last_day_of_month)
