@@ -11,6 +11,12 @@ target_sources(date_wrapper_tests
         "${CMAKE_CURRENT_LIST_DIR}/test_date_time_range.cpp"
 )
 
-target_link_libraries(date_wrapper_tests date_wrapper gtest_main)
+target_link_libraries(date_wrapper_tests 
+    PRIVATE
+        project_options
+        project_warnings
+        date_wrapper
+        gtest_main
+)
 
 gtest_discover_tests(date_wrapper_tests)
