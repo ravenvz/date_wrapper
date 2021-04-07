@@ -801,7 +801,7 @@ inline constexpr Date operator+(const Date& date, const Years& years) noexcept
     auto ymd = utils::to_ymd(date) + date::years{years.count()};
     if (!ymd.ok())
         ymd = ymd.year() / ymd.month() / date::last;
-    return Date(utils::from_ymd(ymd));
+    return utils::from_ymd(ymd);
 }
 
 inline constexpr Date operator-(const Date& date, const Years& years) noexcept
