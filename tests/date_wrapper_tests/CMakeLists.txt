@@ -13,8 +13,8 @@ target_sources(date_wrapper_tests
 
 target_link_libraries(date_wrapper_tests 
     PRIVATE
-        project_options
-        project_warnings
+        date_wrapper_options
+        date_wrapper_warnings
         date_wrapper
         gtest_main
 )

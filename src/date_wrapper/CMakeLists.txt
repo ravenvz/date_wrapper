@@ -22,6 +22,6 @@ target_sources(date_wrapper
 target_link_libraries(
     date_wrapper
     INTERFACE
-        project_options
-        project_warnings
+        date_wrapper_options
+        date_wrapper_warnings
 )
