@@ -1,6 +1,3 @@
-set(PROJECT_TESTS test_suite)
-project(${PROJECT_TESTS})
-
 find_package(Threads REQUIRED)
 
 # Download GTest at configure time
