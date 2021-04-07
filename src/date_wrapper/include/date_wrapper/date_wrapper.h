@@ -29,7 +29,6 @@
 #include <date/date.h>
 #include <date/iso_week.h>
 #include <iomanip>
-#include <array>
 
 namespace dw {
 
@@ -49,7 +48,6 @@ enum class Weekday {
     Sunday
 };
 
-
 struct Year {
     explicit constexpr Year(int year) noexcept;
 
@@ -66,7 +64,6 @@ operator<<(std::basic_ostream<CharT, Traits>& os, const Year& year);
 constexpr bool operator==(const Year& lhs, const Year& rhs) noexcept;
 
 constexpr bool operator!=(const Year& lhs, const Year& rhs) noexcept;
-
 
 struct Month {
     explicit constexpr Month(unsigned month) noexcept;
@@ -85,7 +82,6 @@ constexpr bool operator==(const Month& lhs, const Month& rhs) noexcept;
 
 constexpr bool operator!=(const Month& lhs, const Month& rhs) noexcept;
 
-
 struct Day {
     explicit constexpr Day(unsigned day) noexcept;
 
@@ -102,7 +98,6 @@ operator<<(std::basic_ostream<CharT, Traits>& os, const Day& day);
 constexpr bool operator==(const Day& lhs, const Day& rhs) noexcept;
 
 constexpr bool operator!=(const Day& lhs, const Day& rhs) noexcept;
-
 
 class Date {
 public:
@@ -245,7 +240,6 @@ constexpr bool operator>=(const Date& lhs, const Date& rhs) noexcept;
 
 constexpr bool operator>(const Date& lhs, const Date& rhs) noexcept;
 
-
 /* Immutable datatype that stores date and time. */
 class DateTime {
 public:
@@ -387,7 +381,6 @@ constexpr DateTime operator+(const DateTime& dt, const Years& years) noexcept;
 
 constexpr DateTime operator-(const DateTime& dt, const Years& years) noexcept;
 
-
 class IsoDate {
 public:
     template <typename Clock, typename Duration>
@@ -410,7 +403,6 @@ public:
 private:
     const iso_week::year_weeknum_weekday i_week;
 };
-
 
 /* Represent finite interval of dates. */
 class DateRange {
@@ -444,7 +436,6 @@ constexpr DateRange add_offset(const DateRange& date_range,
 std::string to_string(const DateRange& ds,
                       std::string_view format,
                       std::string sep = " - ");
-
 
 /* Represent finite interval in time with start and finish points. */
 struct DateTimeRange {
@@ -500,46 +491,35 @@ constexpr bool operator==(const DateTimeRange& lhs,
 constexpr DateTimeRange add_offset(const DateTimeRange& dt_range,
                                    std::chrono::seconds offset) noexcept;
 
-
 namespace utils {
 
-    // TODO check functions that are now in date lib for week encoding in next
-    // date release
-    constexpr std::array<unsigned, 7> mondayFirstTable{
-        {6u, 0u, 1u, 2u, 3u, 4u, 5u}};
+bool startsWith(std::string_view str, std::string_view prefix);
 
-    constexpr std::array<unsigned, 7> sundayFirstTable{
-        {1u, 2u, 3u, 4u, 5u, 6u, 0u}};
+bool startsWith(std::string_view str, char ch);
 
-    bool startsWith(std::string_view str, std::string_view prefix);
+constexpr date::weekday convert(dw::Weekday weekday) noexcept;
 
-    bool startsWith(std::string_view str, char ch);
+/* Convert std::tm to std::chrono::timepoint. */
+template <typename Clock, typename Duration>
+void fill_timepoint(const std::tm& t,
+                    std::chrono::time_point<Clock, Duration>& tp);
 
-    constexpr date::weekday convert(dw::Weekday weekday) noexcept;
+template <typename T> struct is_chrono_duration {
+    static constexpr bool value = false;
+};
 
-    /* Convert std::tm to std::chrono::timepoint. */
-    template <typename Clock, typename Duration>
-    void fill_timepoint(const std::tm& t,
-                        std::chrono::time_point<Clock, Duration>& tp);
+template <typename Rep, typename Period>
+struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
+    static constexpr bool value = true;
+};
 
-    template <typename T>
-    struct is_chrono_duration {
-        static constexpr bool value = false;
-    };
+std::string formatDateTime(const DateTime& dt, std::string_view format);
 
-    template <typename Rep, typename Period>
-    struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
-        static constexpr bool value = true;
-    };
+constexpr Date from_ymd(const date::year_month_day& ymd) noexcept;
 
-    std::string formatDateTime(const DateTime& dt, std::string_view format);
-
-    constexpr Date from_ymd(const date::year_month_day& ymd) noexcept;
-
-    constexpr date::year_month_day to_ymd(const Date& date) noexcept;
+constexpr date::year_month_day to_ymd(const Date& date) noexcept;
 
 } // namespace utils
-
 
 // Year implementation
 
@@ -571,7 +551,6 @@ constexpr bool operator!=(const Year& lhs, const Year& rhs) noexcept
     return !(lhs == rhs);
 }
 
-
 // Month implementation
 
 constexpr Month::Month(unsigned month) noexcept
@@ -602,7 +581,6 @@ constexpr bool operator!=(const Month& lhs, const Month& rhs) noexcept
     return !(lhs == rhs);
 }
 
-
 // Day implementation
 
 constexpr Day::Day(unsigned day) noexcept
@@ -632,7 +610,6 @@ constexpr bool operator!=(const Day& lhs, const Day& rhs) noexcept
 {
     return !(lhs == rhs);
 }
-
 
 // Date implementation
 
@@ -665,8 +642,7 @@ constexpr Date::operator sys_days() const noexcept { return ymd_; }
 constexpr Date prev_weekday(const Date& date, Weekday target) noexcept
 {
     const date::sys_days sd{utils::to_ymd(date)};
-    const date::weekday target_weekday{
-        utils::sundayFirstTable[static_cast<unsigned>(target)]};
+    const date::weekday target_weekday{static_cast<unsigned>(target) + 1};
     return Date{utils::from_ymd(
         date::year_month_day{sd - (date::weekday{sd} - target_weekday)})};
 }
@@ -680,8 +656,7 @@ constexpr Date prev_weekday_excluding_current(const Date& date,
 constexpr Date next_weekday(const Date& date, Weekday target) noexcept
 {
     const date::sys_days sd{utils::to_ymd(date)};
-    const date::weekday target_weekday{
-        utils::sundayFirstTable[static_cast<unsigned>(target)]};
+    const date::weekday target_weekday{static_cast<unsigned>(target) + 1};
     return Date{utils::from_ymd(
         date::year_month_day{sd + (target_weekday - date::weekday{sd})})};
 }
@@ -701,11 +676,8 @@ constexpr Date last_day_of_month(const Date& date) noexcept
 
 inline constexpr Weekday weekday(const Date& date) noexcept
 {
-    // TODO on next date release this should work:
-    // return static_cast<Weekday>(
-    //     date::weekday(utils::to_ymd(date)).iso_encoding());
-    return static_cast<Weekday>(utils::mondayFirstTable[static_cast<unsigned>(
-        date::weekday(utils::to_ymd(date)))]);
+    return static_cast<Weekday>(
+        date::weekday(utils::to_ymd(date)).iso_encoding() - 1);
 }
 
 inline Date current_date() noexcept
@@ -858,10 +830,10 @@ operator<<(std::basic_ostream<CharT, Traits>& os, const Date& date)
 
 inline constexpr bool operator==(const Date& lhs, const Date& rhs) noexcept
 {
-    return static_cast<int>(lhs.year()) == static_cast<int>(rhs.year())
-        && static_cast<unsigned>(lhs.month())
-        == static_cast<unsigned>(rhs.month())
-        && static_cast<unsigned>(lhs.day()) == static_cast<unsigned>(rhs.day());
+    return static_cast<int>(lhs.year()) == static_cast<int>(rhs.year()) &&
+           static_cast<unsigned>(lhs.month()) ==
+               static_cast<unsigned>(rhs.month()) &&
+           static_cast<unsigned>(lhs.day()) == static_cast<unsigned>(rhs.day());
 }
 
 constexpr bool operator!=(const Date& lhs, const Date& rhs) noexcept
@@ -877,17 +849,17 @@ constexpr bool operator<=(const Date& lhs, const Date& rhs) noexcept
 constexpr bool operator<(const Date& lhs, const Date& rhs) noexcept
 {
     return static_cast<int>(lhs.year()) < static_cast<int>(rhs.year())
-        ? true
-        : (static_cast<int>(lhs.year()) > static_cast<int>(rhs.year())
-               ? false
-               : (static_cast<unsigned>(lhs.month())
-                          < static_cast<unsigned>(rhs.month())
-                      ? true
-                      : (static_cast<unsigned>(lhs.month())
-                                 > static_cast<unsigned>(rhs.month())
-                             ? false
-                             : (static_cast<unsigned>(lhs.day())
-                                < static_cast<unsigned>(rhs.day())))));
+               ? true
+               : (static_cast<int>(lhs.year()) > static_cast<int>(rhs.year())
+                      ? false
+                      : (static_cast<unsigned>(lhs.month()) <
+                                 static_cast<unsigned>(rhs.month())
+                             ? true
+                             : (static_cast<unsigned>(lhs.month()) >
+                                        static_cast<unsigned>(rhs.month())
+                                    ? false
+                                    : (static_cast<unsigned>(lhs.day()) <
+                                       static_cast<unsigned>(rhs.day())))));
 }
 
 constexpr bool operator>=(const Date& lhs, const Date& rhs) noexcept
@@ -900,15 +872,14 @@ constexpr bool operator>(const Date& lhs, const Date& rhs) noexcept
     return rhs < lhs;
 }
 
-
 // DateTime implementation
 
 template <typename Clock, typename Duration>
 inline constexpr DateTime::DateTime(
     const std::chrono::time_point<Clock, Duration>& timepoint) noexcept
     : ymd{date::year_month_day(std::chrono::floor<date::days>(timepoint))}
-    , tod{date::make_time(timepoint
-                          - std::chrono::floor<date::days>(timepoint))}
+    , tod{date::make_time(timepoint -
+                          std::chrono::floor<date::days>(timepoint))}
 {
 }
 
@@ -965,9 +936,7 @@ constexpr std::chrono::seconds DateTime::second() const noexcept
 
 constexpr Weekday DateTime::weekday() const noexcept
 {
-    auto dayNumber
-        = utils::mondayFirstTable[static_cast<unsigned>(date::weekday(ymd))];
-    return static_cast<Weekday>(dayNumber);
+    return static_cast<Weekday>(date::weekday(ymd).iso_encoding() - 1);
 }
 
 inline DateTime current_date_time() noexcept
@@ -989,8 +958,8 @@ inline constexpr std::chrono::time_point<Clock, ToDuration>
 to_time_point(const DateTime& dt) noexcept
 {
     using namespace std::chrono;
-    return time_point_cast<ToDuration>(sys_days(dt.date()))
-        + std::chrono::floor<ToDuration>(dt.time());
+    return time_point_cast<ToDuration>(sys_days(dt.date())) +
+           std::chrono::floor<ToDuration>(dt.time());
 }
 
 template <class CharT, class Traits>
@@ -1092,7 +1061,6 @@ constexpr inline DateTime operator-(const DateTime& dt,
     return dt + -years;
 }
 
-
 // IsoDate implementation
 
 template <typename Clock, typename Duration>
@@ -1132,7 +1100,6 @@ constexpr inline bool operator==(const IsoDate& lhs,
 {
     return lhs.i_week == rhs.i_week;
 }
-
 
 // DateRange implementation
 
@@ -1186,7 +1153,6 @@ to_string(const DateRange& ds, std::string_view format, std::string sep)
     return ss.str();
 }
 
-
 // DateTimeRange implementation
 
 template <typename Clock, typename Duration>
@@ -1215,8 +1181,8 @@ inline constexpr ToDuration DateTimeRange::duration() const noexcept
     using namespace std::chrono;
     static_assert(utils::is_chrono_duration<ToDuration>::value,
                   "duration must be a std::chrono::duration");
-    return date::abs(to_time_point<ToDuration>(finish_)
-                     - to_time_point<ToDuration>(start_));
+    return date::abs(to_time_point<ToDuration>(finish_) -
+                     to_time_point<ToDuration>(start_));
 }
 
 inline std::string to_string(const DateTimeRange& date_time_range,
@@ -1229,7 +1195,6 @@ inline std::string to_string(const DateTimeRange& date_time_range,
        << to_string(date_time_range.finish(), format);
     return ss.str();
 }
-
 
 template <class CharT, class Traits>
 inline std::basic_ostream<CharT, Traits>&
@@ -1257,150 +1222,148 @@ inline constexpr DateTimeRange add_offset(const DateTimeRange& dt_range,
     return DateTimeRange{dt_range.start() + offset, dt_range.finish() + offset};
 }
 
-
 namespace utils {
 
-    inline bool startsWith(std::string_view str, std::string_view prefix)
-    {
-        if (prefix.size() > str.size())
-            return false;
-        return std::equal(prefix.cbegin(), prefix.cend(), str.cbegin());
-    }
+inline bool startsWith(std::string_view str, std::string_view prefix)
+{
+    if (prefix.size() > str.size())
+        return false;
+    return std::equal(prefix.cbegin(), prefix.cend(), str.cbegin());
+}
 
-    inline bool startsWith(std::string_view str, char ch)
-    {
-        return !str.empty() && str[0] == ch;
-    }
+inline bool startsWith(std::string_view str, char ch)
+{
+    return !str.empty() && str[0] == ch;
+}
 
-    inline constexpr date::weekday convert(dw::Weekday weekday) noexcept
-    {
-        return date::weekday{
-            sundayFirstTable[static_cast<unsigned>(weekday) + 1]};
-    }
+inline constexpr date::weekday convert(dw::Weekday weekday) noexcept
+{
+    return date::weekday{static_cast<unsigned>(weekday) + 1};
+}
 
-    /* Convert std::tm to std::chrono::timepoint. */
-    template <typename Clock, typename Duration>
-    inline void fill_timepoint(const std::tm& t,
-                               std::chrono::time_point<Clock, Duration>& tp)
-    {
-        using namespace std::chrono;
-        using namespace date;
-        int y = t.tm_year + 1900;
-        auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
-        if (!ymd.ok())
-            throw std::runtime_error("Invalid date");
-        tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min)
-            + seconds(t.tm_sec);
-    }
+/* Convert std::tm to std::chrono::timepoint. */
+template <typename Clock, typename Duration>
+inline void fill_timepoint(const std::tm& t,
+                           std::chrono::time_point<Clock, Duration>& tp)
+{
+    using namespace std::chrono;
+    using namespace date;
+    int y = t.tm_year + 1900;
+    auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
+    if (!ymd.ok())
+        throw std::runtime_error("Invalid date");
+    tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min) +
+         seconds(t.tm_sec);
+}
 
-    inline std::string formatDateTime(const dw::DateTime& dt,
-                                      std::string_view format)
-    {
-        std::stringstream ss;
+inline std::string formatDateTime(const dw::DateTime& dt,
+                                  std::string_view format)
+{
+    std::stringstream ss;
 
-        while (!format.empty()) {
-            if (startsWith(format, "''")) {
-                ss << '\'';
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, '\'')) {
-                format.remove_prefix(1);
-                if (format.find_first_of('\'') != std::string_view::npos) {
-                    while (!startsWith(format, '\'')) {
-                        ss << format.front();
-                        format.remove_prefix(1);
-                    }
+    while (!format.empty()) {
+        if (startsWith(format, "''")) {
+            ss << '\'';
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, '\'')) {
+            format.remove_prefix(1);
+            if (format.find_first_of('\'') != std::string_view::npos) {
+                while (!startsWith(format, '\'')) {
+                    ss << format.front();
                     format.remove_prefix(1);
                 }
-            }
-            else if (startsWith(format, "yyyy")) {
-                ss << std::setfill('0') << std::setw(4)
-                   << static_cast<int>(dt.year());
-                format.remove_prefix(4);
-            }
-            else if (startsWith(format, "yy")) {
-                ss << std::setfill('0') << std::setw(2)
-                   << static_cast<int>(dt.year()) % 100;
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, "MM")) {
-                ss << std::setfill('0') << std::setw(2)
-                   << static_cast<unsigned>(dt.month());
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, 'M')) {
-                ss << static_cast<unsigned>(dt.month());
-                format.remove_prefix(1);
-            }
-            else if (startsWith(format, "dd")) {
-                ss << std::setfill('0') << std::setw(2)
-                   << static_cast<unsigned>(dt.day());
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, 'd')) {
-                ss << static_cast<unsigned>(dt.day());
-                format.remove_prefix(1);
-            }
-            else if (startsWith(format, "hh")) {
-                ss << std::setfill('0') << std::setw(2) << dt.hour().count();
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, 'h')) {
-                ss << dt.hour().count();
-                format.remove_prefix(1);
-            }
-            else if (startsWith(format, "mm")) {
-                ss << std::setfill('0') << std::setw(2) << dt.minute().count();
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, 'm')) {
-                ss << dt.minute().count();
-                format.remove_prefix(1);
-            }
-            else if (startsWith(format, "ss")) {
-                ss << std::setfill('0') << std::setw(2) << dt.second().count();
-                format.remove_prefix(2);
-            }
-            else if (startsWith(format, 's')) {
-                ss << dt.second().count();
-                format.remove_prefix(1);
-            }
-            else {
-                ss << format.front();
                 format.remove_prefix(1);
             }
         }
-
-        return ss.str();
+        else if (startsWith(format, "yyyy")) {
+            ss << std::setfill('0') << std::setw(4)
+               << static_cast<int>(dt.year());
+            format.remove_prefix(4);
+        }
+        else if (startsWith(format, "yy")) {
+            ss << std::setfill('0') << std::setw(2)
+               << static_cast<int>(dt.year()) % 100;
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, "MM")) {
+            ss << std::setfill('0') << std::setw(2)
+               << static_cast<unsigned>(dt.month());
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, 'M')) {
+            ss << static_cast<unsigned>(dt.month());
+            format.remove_prefix(1);
+        }
+        else if (startsWith(format, "dd")) {
+            ss << std::setfill('0') << std::setw(2)
+               << static_cast<unsigned>(dt.day());
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, 'd')) {
+            ss << static_cast<unsigned>(dt.day());
+            format.remove_prefix(1);
+        }
+        else if (startsWith(format, "hh")) {
+            ss << std::setfill('0') << std::setw(2) << dt.hour().count();
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, 'h')) {
+            ss << dt.hour().count();
+            format.remove_prefix(1);
+        }
+        else if (startsWith(format, "mm")) {
+            ss << std::setfill('0') << std::setw(2) << dt.minute().count();
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, 'm')) {
+            ss << dt.minute().count();
+            format.remove_prefix(1);
+        }
+        else if (startsWith(format, "ss")) {
+            ss << std::setfill('0') << std::setw(2) << dt.second().count();
+            format.remove_prefix(2);
+        }
+        else if (startsWith(format, 's')) {
+            ss << dt.second().count();
+            format.remove_prefix(1);
+        }
+        else {
+            ss << format.front();
+            format.remove_prefix(1);
+        }
     }
 
-    constexpr Date from_ymd(const date::year_month_day& ymd) noexcept
-    {
-        return Date{Year{static_cast<int>(ymd.year())},
-                    Month{static_cast<unsigned>(ymd.month())},
-                    Day{static_cast<unsigned>(ymd.day())}};
-    }
+    return ss.str();
+}
 
-    constexpr date::year_month_day to_ymd(const Date& date) noexcept
-    {
-        return date::year_month_day{
-            date::year{static_cast<int>(date.year())},
-            date::month{static_cast<unsigned>(date.month())},
-            date::day{static_cast<unsigned>(date.day())}};
-    }
+constexpr Date from_ymd(const date::year_month_day& ymd) noexcept
+{
+    return Date{Year{static_cast<int>(ymd.year())},
+                Month{static_cast<unsigned>(ymd.month())},
+                Day{static_cast<unsigned>(ymd.day())}};
+}
 
-    template <class Duration, class Rep, class Period>
-    inline Duration checked_convert(std::chrono::duration<Rep, Period> d)
-    {
-        using namespace std::chrono;
-        using S = duration<double, typename Duration::period>;
-        constexpr S m = Duration::min();
-        constexpr S M = Duration::max();
-        S s = d;
-        if (s < m || s > M)
-            throw std::overflow_error("checked_convert");
-        return duration_cast<Duration>(s);
-    }
+constexpr date::year_month_day to_ymd(const Date& date) noexcept
+{
+    return date::year_month_day{
+        date::year{static_cast<int>(date.year())},
+        date::month{static_cast<unsigned>(date.month())},
+        date::day{static_cast<unsigned>(date.day())}};
+}
+
+template <class Duration, class Rep, class Period>
+inline Duration checked_convert(std::chrono::duration<Rep, Period> d)
+{
+    using namespace std::chrono;
+    using S = duration<double, typename Duration::period>;
+    constexpr S m = Duration::min();
+    constexpr S M = Duration::max();
+    S s = d;
+    if (s < m || s > M)
+        throw std::overflow_error("checked_convert");
+    return duration_cast<Duration>(s);
+}
 
 } // namespace utils
 

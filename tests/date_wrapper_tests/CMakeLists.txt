@@ -1,12 +1,8 @@
-cmake_minimum_required(VERSION 3.11)
-
 set(MODULE_TEST date_wrapper_tests)
 
-project(${MODULE_TEST})
+add_executable(date_wrapper_tests ${SOURCE_FILES})
 
-add_executable(${MODULE_TEST} ${SOURCE_FILES})
-
-target_sources(${MODULE_TEST}
+target_sources(date_wrapper_tests
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/test_date.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/test_date_range.cpp"
@@ -15,6 +11,6 @@ target_sources(${MODULE_TEST}
         "${CMAKE_CURRENT_LIST_DIR}/test_date_time_range.cpp"
 )
 
-target_link_libraries(${MODULE_TEST} date_wrapper gtest_main)
+target_link_libraries(date_wrapper_tests date_wrapper gtest_main)
 
-gtest_discover_tests(${MODULE_TEST})
+gtest_discover_tests(date_wrapper_tests)
