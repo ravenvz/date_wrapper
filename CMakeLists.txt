@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(PROJECT date_wrapper_project VERSION 0.8.5)
+set(PROJECT date_wrapper_project VERSION 0.8.6)
 
 project(${PROJECT})
 
