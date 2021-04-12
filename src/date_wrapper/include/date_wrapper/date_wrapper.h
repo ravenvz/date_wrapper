@@ -499,6 +499,8 @@ bool startsWith(std::string_view str, char ch);
 
 constexpr date::weekday convert(dw::Weekday weekday) noexcept;
 
+std::tm get_local_time();
+
 /* Convert std::tm to std::chrono::timepoint. */
 template <typename Clock, typename Duration>
 void fill_timepoint(const std::tm& t,
@@ -691,17 +693,10 @@ inline Date current_date() noexcept
 
 inline Date current_date_local() noexcept
 {
-    auto timepoint = std::chrono::system_clock::now();
-    std::time_t t = std::chrono::system_clock::to_time_t(timepoint);
-#ifdef __linux__
-    std::tm local_time;
-    localtime_r(&t, &local_time);
-#else
-    std::tm local_time = *std::localtime(&t);
-#endif
-    return Date{Year{local_time.tm_year + 1900},
-                Month{static_cast<unsigned>(local_time.tm_mon + 1)},
-                Day{static_cast<unsigned>(local_time.tm_mday)}};
+    std::tm localTime = utils::get_local_time();
+    return Date{Year{localTime.tm_year + 1900},
+                Month{static_cast<unsigned>(localTime.tm_mon + 1)},
+                Day{static_cast<unsigned>(localTime.tm_mday)}};
 }
 
 inline std::string to_string(const Date& date, std::string_view format)
@@ -947,8 +942,7 @@ inline DateTime current_date_time() noexcept
 inline DateTime current_date_time_local() noexcept
 {
     auto timepoint = std::chrono::system_clock::now();
-    std::time_t t = std::chrono::system_clock::to_time_t(timepoint);
-    std::tm localTime = *std::localtime(&t);
+    std::tm localTime = utils::get_local_time();
     utils::fill_timepoint(localTime, timepoint);
     return DateTime{timepoint};
 }
@@ -1239,6 +1233,18 @@ inline bool startsWith(std::string_view str, char ch)
 inline constexpr date::weekday convert(dw::Weekday weekday) noexcept
 {
     return date::weekday{static_cast<unsigned>(weekday) + 1};
+}
+
+inline std::tm get_local_time() {
+    auto timepoint = std::chrono::system_clock::now();
+    std::time_t t = std::chrono::system_clock::to_time_t(timepoint);
+#ifdef _MSC_VER
+    std::tm localTime;
+    localtime_s(&localTime, &t);
+#else
+    std::tm localTime = *std::localtime(&t);
+#endif
+    return localTime;
 }
 
 /* Convert std::tm to std::chrono::timepoint. */
