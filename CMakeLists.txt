@@ -40,7 +40,6 @@ enable_sanitizers(date_wrapper_options)
 # include(cmake/Doxygen.cmake)
 # enable_doxygen()
 
-
 add_subdirectory(src/date_wrapper)
 
 if (BUILD_TESTS)
