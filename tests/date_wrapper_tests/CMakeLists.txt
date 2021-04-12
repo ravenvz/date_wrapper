@@ -1,4 +1,3 @@
-set(MODULE_TEST date_wrapper_tests)
 
 add_executable(date_wrapper_tests ${SOURCE_FILES})
 
