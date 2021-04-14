@@ -1255,7 +1255,7 @@ inline void fill_timepoint(const std::tm& t,
     using namespace std::chrono;
     using namespace date;
     int y = t.tm_year + 1900;
-    auto ymd = year(y) / (t.tm_mon + 1) / t.tm_mday;
+    auto ymd = date::year(y) / (t.tm_mon + 1) / t.tm_mday;
     if (!ymd.ok())
         throw std::runtime_error("Invalid date");
     tp = sys_days(ymd) + hours(t.tm_hour) + minutes(t.tm_min) +
